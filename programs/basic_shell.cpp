@@ -32,8 +32,9 @@ namespace Direction {
 	Typedefs/Structs
 */ 
 
-// Void function that takes in an arg_list and Robot object
 typedef list<string> 				arg_list;
+
+// Void function that takes in an arg_list and Robot object
 typedef void 							handler (arg_list& args, Robot& robot );
 typedef struct {
 	string 							name; // Function Name, to users
@@ -70,7 +71,6 @@ command_list	commands;
 handler			hl_help;
 handler			hl_quit; 
 handler 			hl_move_xyz;
-handler			hl_move_abc; 
 handler			hl_home_smart;
 
 
@@ -288,6 +288,15 @@ void hl_move_to_position_rel(arg_list & args, Robot & robot)
 	robot.moveTo(new_pos);
 }
 
+/*
+	Function			: convert_relative
+	Description		: Returns (MINIMUM_AXIS_SETTING) + f * (MAXIMUM_AXIS_SETTING - MINIMUM_AXIS_SETTING)
+	Arguments		: 
+		- d			: A 'Direction' enum telling the function what axis it's dealing with.
+		- f			: A number, between 0.0 and 1.0. 0.0 corresponds to the 
+		- robot		: a reference to the Gantry Robot.
+	Returns			: A float: see Description
+*/
 float convert_relative(Direction::Dir d, float f, Robot & robot)
 {
 	RobotPosition min = robot.currentLimits().min();
@@ -307,16 +316,7 @@ float convert_relative(Direction::Dir d, float f, Robot & robot)
 
 
 	calculated =  min_amt + (max_amt - min_amt) * f;
-///cout << "Min		 : " << min_amt << endl;
-///cout << "Max		 : " << max_amt << endl;
-///cout << "f         : " << f << endl;
-///cout << "CALCULATED: " << calculated << endl;
 	return calculated;
-}
-
-void hl_move_abc(arg_list & args, Robot & robot)
-{
-	cout << "hl_move_abc: This doesn't do anything yet." << endl;
 }
 
 /*
@@ -332,32 +332,19 @@ void hl_get_pos(arg_list & args, Robot & robot)
 	cout << "Robot Position: " << robot.currentPos() << endl;
 }
 
+/*
+	Function			: hl_get_limits
+	Description		: Display the limits of the Gantry Robot
+	Arguments		: 
+		- arg_list	: a list of arguments to the function that will be ignored.
+		- robot		: a reference to the Gantry Robot.
+	Returns			: void
+*/
 void hl_get_limits(arg_list & args, Robot & robot)
 {
 	cout << robot.currentLimits() << endl;
 }
 
-void hl_move_down(arg_list & args, Robot & robot)
-{
-   cout << "Moving Down" << endl;
-
-// const string crap = "JOINT 3, -25";
-// robot.runCmd("JOINT 3,-25");
-	robot.moveTo2(500.0, -800.0, -100.0, 0.0071, 0.0036, 0.0071, 50);
-
-}
-
-void hl_home(arg_list & args, Robot & robot)
-{
-// cout << "Homing" << endl;
-// robot.home();
-	
-	// Execute a HOMEZC
-	cout << "Homing the Gantry Robot using HOMEZC." << endl;
-	robot.runCmd("HOMEZC");
-	cout << "Finished homing the Gantry Robot using HOMEZC." << endl;
-	cout << "The 'HOME' light shodul be On." << endl;
-}
 
 
 void hl_aaron_test(arg_list & args, Robot & robot)
@@ -400,12 +387,15 @@ void hl_aaron_test(arg_list & args, Robot & robot)
 	cout << "AVERAGE POSITION:" << endl;
 	cout << average_pos << endl;
 
-///robot.moveTo(average_pos);
-
-
-
 }
 
+
+/*
+	Function			: construct_commands()
+	Description		: Fill the commands 'vector'
+	Arguments		: None
+	Returns			: void
+*/
 void construct_commands() 
 {
 	// Initialize it
@@ -418,7 +408,6 @@ void construct_commands()
 	commands.push_back({ "lim",	hl_get_limits,	"Get Limits." });
 
 	// New shit
-   commands.push_back({ "left", hl_move_down, "Go Left." });
    commands.push_back({ "home", hl_home_smart, "Go Home." });
 
 	commands.push_back({ "aaron", hl_aaron_test, "Test Stuff." });
@@ -428,6 +417,14 @@ void construct_commands()
 	commands.push_back({ "3df", hl_move_to_position_rel, "Move to Float." });
 }
 
+/*
+	Function			: execute_command
+	Description		: Execute the correct command based on the string input from 'readline'
+	Arguments		: 
+		- command	: String containing text input from terminal
+		- robot  	: The Gantry Robot object
+	Returns			: A reference to the string that was passed in, after trimming
+*/
 void execute_command(const string& command, Robot & robot)
 {
 	// Split the command into a list of arguments and a command name
@@ -454,12 +451,15 @@ void execute_command(const string& command, Robot & robot)
 	if (!found) {
 		cout << "Command <" << name << "> not found." << endl;
 	}
-	
-
-
-
 }
 
+/*
+	Function			: trim
+	Description		: Remove leading and trailing whitespace + tabs from a string.
+	Arguments		: 
+		- s			: The string to trim
+	Returns			: A reference to the string that was passed in, after trimming
+*/
 string & trim (string & s)
 {
 	size_t pos = s.find_first_not_of(" \t");
@@ -475,6 +475,10 @@ string & trim (string & s)
 	return s;
 }
 
+/*
+	Function			: Main
+	Returns			: 0
+*/
 int main(int argc, char * argv[])
 {
 	// TODO assign rl_completion_entry_function
@@ -507,6 +511,8 @@ int main(int argc, char * argv[])
 		}
 
 	}
+
+	return 0;
 }
 
 // Trim
