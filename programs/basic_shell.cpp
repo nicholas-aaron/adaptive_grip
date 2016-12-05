@@ -145,6 +145,7 @@ void hl_home_smart(arg_list & args, Robot & robot)
 		homezc_cmd.str("HOMEZC ");
 		homezc_cmd.seekp(0, ios::end);
 		// Generate the "HOMEZC [AXIS]" command
+		// Append axis to homezc_cmd
 		homezc_cmd << axis;
 
 		// Run the command. Poll the controller buffer for an error 
@@ -155,7 +156,7 @@ void hl_home_smart(arg_list & args, Robot & robot)
 
 		// Read the controller's reply from the homezc command.
 		robot.controller >> homezc_reply;
-		
+	
 		// If the reply from the controller contains an 'ARM POWER' error
 		// message, it means the axis we tried to home did not home 
 		// successfully.
@@ -238,6 +239,8 @@ void hl_move_to_position_float(arg_list & args, Robot & robot)
 			args.pop_front();
 		}
 
+
+		// The below code requires that the input data is structured as X: val_x Y: val_y Z:val_z
 		if 	  (axis == "x") 		new_pos.x = value;
 		else if (axis == "y") 		new_pos.y = value;
 		else if (axis == "z") 		new_pos.z = value;
@@ -393,7 +396,7 @@ void hl_aaron_test(arg_list & args, Robot & robot)
 /*
 	Function			: construct_commands()
 	Description		: Fill the commands 'vector'
-	Arguments		: None
+	rguments		: None
 	Returns			: void
 */
 void construct_commands() 
