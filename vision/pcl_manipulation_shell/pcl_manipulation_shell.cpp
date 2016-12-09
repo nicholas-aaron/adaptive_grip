@@ -362,7 +362,6 @@ int open_file(arg_list input)
 {
 // string filename = input.front();
 // const string filename = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/vision/pcl_segmentation/table_scene_lms400.pcd"; // TODO FOR NOW
-   const string filename = "../../../data/saved_kinect_pcd.pcd";
 // const string filename = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/data/saved_kinect_pcd.pcd"; // TODO FOR NOW
    const string filename = "../../../data/saved_kinect_pcd.pcd";
    cout << "Opening: " << filename << endl;
