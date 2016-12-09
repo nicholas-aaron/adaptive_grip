@@ -5,6 +5,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/filters/plane_clipper3D.h>
 #include <pcl/io/openni_grabber.h>
 
 extern "C" {
@@ -27,13 +28,15 @@ using                                                    stringmanip::arg_list;
 typedef  pcl::PointXYZRGBA                               point_t;
 
 // Forward Function Declarations
-void                                                     prompt(const string);
 int                                                      open_file(arg_list args);
 int                                                      segment(arg_list args);
 int                                                      remove_segment(arg_list args);
 int                                                      capture_from_camera(arg_list input);
 int                                                      adjust_seg_threshold(arg_list input);
+int                                                      adjust_plane(arg_list input);
+int                                                      remove_plane(arg_list input);
 
+// TODO deprecate, this was used to test things
 int                                                      segment2(arg_list args);
 
 // Program variables and objects
@@ -42,11 +45,15 @@ pcl::PointCloud<point_t>::ConstPtr                       m_cam_cloud;
 bool                                                     quit = false;
 boost::shared_ptr<pcl::visualization::PCLVisualizer>     viewer;
 
+pcl::ModelCoefficients::Ptr                              floor_coef; 
+pcl::ModelCoefficients::Ptr                              rplane_coef; 
+
 bool                                                     received_input = false;
 char *                                                   cmdline_input;
 string                                                   input;
 bool                                                     point_cloud_loaded = false;
 bool                                                     got_cam_cloud = false;
+bool                                                     got_plane = false;
 
 // Visualization Mutex
 Mutex                                                    * upd_vis_mutex;
@@ -54,6 +61,7 @@ Mutex                                                    * input_mutex;
 Mutex                                                    * cloud_mutex;
 
 pcl::PointIndices::Ptr                                   plane_inliers (new pcl::PointIndices());
+
 
 pcl::Grabber *                                           interface;
 
@@ -84,6 +92,10 @@ int main(int argc, char ** argv)
    upd_vis_mutex = new Mutex();
    input_mutex   = new Mutex();
    cloud_mutex   = new Mutex();
+
+   // Coefficients
+   floor_coef = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients());
+   rplane_coef = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients());
 
 #define NOT_CONNECTING_INTERFACE
 #ifndef NOT_CONNECTING_INTERFACE
@@ -179,6 +191,14 @@ int main(int argc, char ** argv)
 
             capture_from_camera(args);
 
+         } else if (cmd_name == "plane") {
+            
+            adjust_plane(args);
+
+         } else if (cmd_name == "remove_plane") {
+
+            remove_plane(args);
+
          } else {
 
             cout << "Command not recognized." << endl;;
@@ -205,7 +225,6 @@ int segment(arg_list input)
       return -1;
    }
 
-   pcl::ModelCoefficients::Ptr         coefficients (new pcl::ModelCoefficients());
    pcl::SACSegmentation<point_t>       seg;
    
    // Optional? TODO investigate
@@ -219,10 +238,12 @@ int segment(arg_list input)
  
    // Perform Segmentation
    seg.setInputCloud(m_cloud);
-   seg.segment(*plane_inliers, *coefficients);
+   seg.segment(*plane_inliers, *floor_coef);
 
    std::cout << "Point Cloud representing plane: " << plane_inliers->indices.size() << " points, out of " << m_cloud->points.size() << " points." << endl;
+
    if (plane_inliers->indices.size() == 0) {
+      cout << "Didn't find a plane!" << endl;
       return -1;
    } else {
 
@@ -236,6 +257,8 @@ int segment(arg_list input)
 
       // Update the cloud, we've changed colors.
       viewer->updatePointCloud(m_cloud, "sample cloud");
+
+      got_plane = true;
    }
 
    return 0;
@@ -250,7 +273,8 @@ int segment2(arg_list input)
       return -1;
    }
 
-   pcl::ModelCoefficients::Ptr      floor_coef   (new pcl::ModelCoefficients());
+   printf("Before anything, floor coef contains %0lu elements.\n", floor_coef->values.size());
+
    pcl::SACSegmentation<point_t>    seg;
 
    // Configure segmentation object
@@ -272,11 +296,52 @@ int segment2(arg_list input)
    //
    // Add first plane?
 
-   viewer->addPlane(*floor_coef, "plane_one");
+// viewer->addPlane(*floor_coef, "plane_one");
+
+   /* HACK BEGIN */
 
    // Add a second plane slightly above the first plane
    //
    // Add a third plane slightly below the first plane
+
+
+   // Allow user to move plane back and forth using arrow keys..
+   //
+
+   pcl::ModelCoefficients::Ptr   variable_coef (new pcl::ModelCoefficients());
+   variable_coef->values = floor_coef->values;
+
+
+   viewer->addPlane(*variable_coef, "plane");
+   viewer->updatePointCloud(m_cloud, "sample cloud");
+
+   
+   char key;
+   float granularity = 0.25;
+   bool displayD = false;
+   cout << "Waiting for keypress. Press 'q' to quit." << endl;
+   while (true) {
+      key = cin.get();
+      displayD = false;
+      if (key == 'o') {
+         variable_coef->values[3] += granularity;
+         displayD = true;
+      } else if (key == 'i'){
+         variable_coef->values[3] -= granularity;
+         displayD = true;
+      } else if (key == 'q') {
+         break;
+      }
+
+      if (displayD) {
+         viewer->removeShape("plane");
+         cout << "D: " << variable_coef->values[3] << endl;
+         viewer->addPlane(*variable_coef, "plane");
+         viewer->updatePointCloud(m_cloud, "sample_cloud");
+      }
+   }
+
+   /* HACK END */
 
 
    return -1;
@@ -359,6 +424,72 @@ int capture_from_camera(arg_list input) {
    interface->stop();
 
    return 0;
+}
+
+int remove_plane(arg_list input) {
+   return -1;
+}
+
+int adjust_plane(arg_list input) {
+
+   if (!got_plane || floor_coef->values.size() == 0) {
+      printf("Plane not yet found. [DEBUG: floor_coef->values.size() = %0lu]\n", floor_coef->values.size());
+      return -1;
+   }
+
+   // Remove the plane if it exists..
+   viewer->removeShape("rplane");
+
+   cout << "Test: " << input.front() << endl;
+
+   // Copy it over
+   rplane_coef->values = floor_coef->values;
+
+   double move_plane_amt = atof(input.front().c_str());
+   double new_d_value    = rplane_coef->values[3] + move_plane_amt;
+
+   printf("Original D = <%f>. Moving by <%f> to <%f>.\n", rplane_coef->values[3], move_plane_amt, new_d_value);
+
+   rplane_coef->values[3] = new_d_value;
+   viewer->addPlane(*rplane_coef, "rplane");
+
+
+   // Segment everything above the plane, everything below the plane.
+
+   Eigen::Vector4f   plane_params;
+   plane_params << rplane_coef->values[0], rplane_coef->values[1], rplane_coef->values[2], rplane_coef->values[3];
+
+   pcl::PlaneClipper3D<point_t> clipper(plane_params);
+
+   std::vector<int> below_plane_indices; 
+   std::vector<int> above_plane_indices;
+
+   clipper.clipPointCloud3D(*m_cloud, below_plane_indices);
+
+   // Above plane:
+   printf("After clipping: %0lu points above the plane.\n", below_plane_indices.size());
+
+   for (std::vector<int>::const_iterator it = below_plane_indices.begin(); it != below_plane_indices.end(); ++it)
+   {
+      m_cloud->points[*it].r = 0;
+      m_cloud->points[*it].g = 0;
+      m_cloud->points[*it].b = 255;
+   }
+
+   viewer->updatePointCloud(m_cloud, "sample cloud");
+
+   // Go through and colour everything at these indices blue.
+
+   return -1;
+
+                                                          
+   
+}
+
+int color_below_plane(arg_list input) {
+   if (rplane_coef->values.size() == 0) {
+      cout << "rplane_coef->values.size() == 0. Can't clip.." << endl;
+   }
 }
 
 int adjust_seg_threshold(arg_list input) {
