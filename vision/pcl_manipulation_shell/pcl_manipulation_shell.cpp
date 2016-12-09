@@ -8,6 +8,9 @@
 #include <pcl/filters/plane_clipper3D.h>
 #include <pcl/io/openni_grabber.h>
 
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/segmentation/extract_clusters.h>
+
 extern "C" {
 #include <stdio.h>
 #include "readline/readline.h"
@@ -35,12 +38,15 @@ int                                                      capture_from_camera(arg
 int                                                      adjust_seg_threshold(arg_list input);
 int                                                      adjust_plane(arg_list input);
 int                                                      remove_plane(arg_list input);
+int                                                      euclidean_extraction(arg_list input);
 
 // TODO deprecate, this was used to test things
 int                                                      segment2(arg_list args);
 
 // Program variables and objects
 pcl::PointCloud<point_t>::Ptr                            m_cloud;                      
+pcl::PointCloud<point_t>::Ptr                            m_cloud_above;                      
+pcl::PointCloud<point_t>::Ptr                            m_cloud_below;                      
 pcl::PointCloud<point_t>::ConstPtr                       m_cam_cloud;
 bool                                                     quit = false;
 boost::shared_ptr<pcl::visualization::PCLVisualizer>     viewer;
@@ -187,6 +193,10 @@ int main(int argc, char ** argv)
 
             remove_segment(args);
 
+         } else if (cmd_name == "eucl") {
+
+            euclidean_extraction(args);
+
          } else if (cmd_name == "camera") {
 
             capture_from_camera(args);
@@ -250,9 +260,9 @@ int segment(arg_list input)
       // Colour points in the plane.
       for (std::vector<int>::const_iterator it = plane_inliers->indices.begin(); it != plane_inliers->indices.end(); ++it)
       {
-         m_cloud->points[*it].r = 255;
+         m_cloud->points[*it].r = 0;
          m_cloud->points[*it].g = 0;
-         m_cloud->points[*it].b = 0;
+         m_cloud->points[*it].b = 255;
       }
 
       // Update the cloud, we've changed colors.
@@ -352,7 +362,9 @@ int open_file(arg_list input)
 {
 // string filename = input.front();
 // const string filename = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/vision/pcl_segmentation/table_scene_lms400.pcd"; // TODO FOR NOW
-   const string filename = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/data/saved_kinect_pcd.pcd"; // TODO FOR NOW
+   const string filename = "../../../data/saved_kinect_pcd.pcd";
+// const string filename = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/data/saved_kinect_pcd.pcd"; // TODO FOR NOW
+   const string filename = "../../../data/saved_kinect_pcd.pcd";
    cout << "Opening: " << filename << endl;
 
    if (pcl::io::loadPCDFile<point_t>(filename, *m_cloud) == -1) {
@@ -461,35 +473,88 @@ int adjust_plane(arg_list input) {
 
    pcl::PlaneClipper3D<point_t> clipper(plane_params);
 
-   std::vector<int> below_plane_indices; 
-   std::vector<int> above_plane_indices;
+   pcl::PointIndices::Ptr below_plane_indices(new pcl::PointIndices());
+   pcl::PointIndices::Ptr above_plane_indices(new pcl::PointIndices());
+// std::vector<int> below_plane_indices; 
+// std::vector<int> above_plane_indices;
 
-   clipper.clipPointCloud3D(*m_cloud, below_plane_indices);
+   clipper.clipPointCloud3D(*m_cloud, below_plane_indices->indices);
+   printf("After clipping: %0lu points below the plane.\n", below_plane_indices->indices.size());
 
-   // Above plane:
-   printf("After clipping: %0lu points above the plane.\n", below_plane_indices.size());
+// viewer->updatePointCloud(m_cloud, "sample cloud");
+   viewer->removePointCloud("sample cloud");
 
-   for (std::vector<int>::const_iterator it = below_plane_indices.begin(); it != below_plane_indices.end(); ++it)
+   m_cloud_above = pcl::PointCloud<point_t>::Ptr(new pcl::PointCloud<point_t>);
+   m_cloud_below = pcl::PointCloud<point_t>::Ptr(new pcl::PointCloud<point_t>);
+
+   // Extract points above the floor into a point cloud.
+   pcl::ExtractIndices<point_t>  extract_above;
+   extract_above.setIndices(below_plane_indices);
+   extract_above.setInputCloud(m_cloud);
+   extract_above.setNegative(true);
+   extract_above.filter(*m_cloud_above);
+
+   // Colour everything in m_cloud_above GREEN
+   for (pcl::PointCloud<point_t>::iterator it = m_cloud_above->begin(); it != m_cloud_above->end(); ++it)
    {
-      m_cloud->points[*it].r = 0;
-      m_cloud->points[*it].g = 0;
-      m_cloud->points[*it].b = 255;
+      (*it).r = 0;
+      (*it).g = 255;
+      (*it).b = 0;
    }
 
-   viewer->updatePointCloud(m_cloud, "sample cloud");
+   // Extract points below the floor into a point cloud.
+   pcl::ExtractIndices<point_t>  extract_below;
+   extract_below.setIndices(below_plane_indices);
+   extract_below.setInputCloud(m_cloud);
+   extract_below.setNegative(false);
+   extract_below.filter(*m_cloud_below);
 
-   // Go through and colour everything at these indices blue.
+   // Colour everything in m_cloud_below RED
+   for (pcl::PointCloud<point_t>::iterator it = m_cloud_below->begin(); it != m_cloud_below->end(); ++it)
+   {
+      (*it).r = 255;
+      (*it).g = 0;
+      (*it).b = 0;
+   }
 
+   viewer->addPointCloud<point_t>(m_cloud_above, "abovePlane");
+   viewer->addPointCloud<point_t>(m_cloud_below, "belowPlane");
+   viewer->updatePointCloud(m_cloud_above, "abovePlane");
+   viewer->updatePointCloud(m_cloud_below, "belowPlane");
+
+   // TODO destroy m_cloud
    return -1;
 
-                                                          
-   
 }
 
-int color_below_plane(arg_list input) {
-   if (rplane_coef->values.size() == 0) {
-      cout << "rplane_coef->values.size() == 0. Can't clip.." << endl;
-   }
+// Extract everything into two clusters.
+int euclidean_extraction(arg_list input) {
+
+   // RIght now: test results using example code given online.
+
+   // Perform a Euclidean Extraction of two clusters with the point clodu m_cloud_above
+   pcl::search::KdTree<point_t>::Ptr   search_tree(new pcl::search::KdTree<point_t>);
+   std::vector<pcl::PointIndices>      cluster_indices;
+
+   std::vector<int> nan_indices;
+   pcl::removeNaNFromPointCloud(*m_cloud_above, *m_cloud_above, nan_indices);
+
+   cout << "`NaN`s in m_cloud_above: " << nan_indices.size() << endl;
+
+   search_tree->setInputCloud(m_cloud_above);
+
+   pcl::EuclideanClusterExtraction<point_t>  ec;
+   ec.setClusterTolerance(0.20); // KNOB - 2cm: ~9 clusters. 20cm: ~3 clusters.
+   ec.setMinClusterSize(100);
+   ec.setMaxClusterSize(25000);
+   ec.setSearchMethod(search_tree);
+   ec.setInputCloud(m_cloud_above);
+   ec.extract(cluster_indices);
+
+   printf("After Euclidean extraction: number of clusters = %0lu\n", cluster_indices.size());
+   
+   return -1;
+
 }
 
 int adjust_seg_threshold(arg_list input) {
