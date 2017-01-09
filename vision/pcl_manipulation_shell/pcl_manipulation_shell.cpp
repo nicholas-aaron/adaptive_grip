@@ -1,24 +1,27 @@
-#include <iostream>
-#include <boost/thread/thread.hpp>
+#include <iostream> // input/output streaming
+#include <boost/thread/thread.hpp> // Multithreading
+#include <pcl/visualization/pcl_visualizer.h> // Visualizing
+#include <pcl/segmentation/sac_segmentation.h> // Segmenting
+#include <pcl/io/pcd_io.h> // Read/write from/to file
+#include <pcl/filters/extract_indices.h> // Extract indices
+#include <pcl/filters/plane_clipper3D.h> // Clip plane
+#include <pcl/io/openni_grabber.h> // Get PCs form Kinect
+#include <pcl/kdtree/kdtree.h> // KDTree for Euclidean Extraction
+#include <pcl/segmentation/extract_clusters.h> // Extract Clusters
+#include <pcl/common/centroid.h> // centroid calculation
+#include <pcl/filters/project_inliers.h> // projection on to plane
 
-#include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/filters/plane_clipper3D.h>
-#include <pcl/io/openni_grabber.h>
-
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/segmentation/extract_clusters.h>
-
-extern "C" {
-#include <stdio.h>
-#include "readline/readline.h"
+extern "C" { // Readline Stuff
+#include <stdio.h> 
+#include "readline/readline.h" 
 #include "readline/history.h"
 }
 
-#include "stringmanip.h"
-#include "mutex.h"
+#include "stringmanip.h" // Custom - Utilities for manipulating strings
+#include "mutex.h" // Custom - Lightweight Mutex class
+#include "colours.h" // Custom - quick colors struct and definitions
+
+#define VERBOSE
 
 // namespace stuff to reduce typing
 using                                                    std::string;
@@ -29,25 +32,26 @@ using                                                    stringmanip::trim;
 using                                                    stringmanip::split;
 using                                                    stringmanip::arg_list;
 typedef  pcl::PointXYZRGBA                               point_t;
+using                                                    pcl::CentroidPoint;
 
 // Forward Function Declarations
 int                                                      open_file(arg_list args);
 int                                                      segment(arg_list args);
 int                                                      remove_segment(arg_list args);
 int                                                      capture_from_camera(arg_list input);
-int                                                      adjust_seg_threshold(arg_list input);
 int                                                      adjust_plane(arg_list input);
 int                                                      remove_plane(arg_list input);
 int                                                      euclidean_extraction(arg_list input);
-
-// TODO deprecate, this was used to test things
-int                                                      segment2(arg_list args);
+void cluster_lines(pcl::PointCloud<point_t>::Ptr   cloud,
+                   std::vector<pcl::PointIndices>  &clusters,
+                   pcl::ModelCoefficients::Ptr     floor_coefficients);
 
 // Program variables and objects
-pcl::PointCloud<point_t>::Ptr                            m_cloud;                      
+pcl::PointCloud<point_t>::Ptr                            m_cloud;                   
 pcl::PointCloud<point_t>::Ptr                            m_cloud_above;                      
 pcl::PointCloud<point_t>::Ptr                            m_cloud_below;                      
 pcl::PointCloud<point_t>::ConstPtr                       m_cam_cloud;
+
 bool                                                     quit = false;
 boost::shared_ptr<pcl::visualization::PCLVisualizer>     viewer;
 
@@ -67,9 +71,9 @@ Mutex                                                    * input_mutex;
 Mutex                                                    * cloud_mutex;
 
 pcl::PointIndices::Ptr                                   plane_inliers (new pcl::PointIndices());
-
-
 pcl::Grabber *                                           interface;
+
+void display_help();
 
 
 
@@ -85,7 +89,7 @@ void get_input()
 void _update_cloud_callback(const pcl::PointCloud<point_t>::ConstPtr &cloud)
 {
    cloud_mutex->lock();
-   m_cam_cloud = cloud; // Is this wrong?
+   m_cam_cloud = cloud; // Is this wrong? A: nope
    got_cam_cloud = true;
    cloud_mutex->unlock();
 }
@@ -95,6 +99,7 @@ int main(int argc, char ** argv)
    // Initialize program Variables and Objects
 
    // Mutexes
+   // Fun fact: Mutex = MUTually EXclusive
    upd_vis_mutex = new Mutex();
    input_mutex   = new Mutex();
    cloud_mutex   = new Mutex();
@@ -109,8 +114,8 @@ int main(int argc, char ** argv)
    interface = new pcl::OpenNIGrabber();
 
    // Note to self - you need to pass in an address to a function for boost::bind
-   // boost::bind(__function_name__ ...) causes a mystery segfault
-   // boost::bind(&__function_name__ ...) works.
+   // boost::bind(__function_name__ ...) will segfault and not tell you why
+   // boost::bind(&__function_name__ ...) is the correct call
    boost::function<void (const pcl::PointCloud<point_t>::ConstPtr &)>   callback_function =
       boost::bind(&_update_cloud_callback, _1); 
    
@@ -128,6 +133,9 @@ int main(int argc, char ** argv)
    viewer = boost::shared_ptr<pcl::visualization::PCLVisualizer>(new pcl::visualization::PCLVisualizer("3D Viewer"));
    viewer->setBackgroundColor(0, 0, 0);
 
+   // ********************************************************************************
+   //    Main Loop
+   // ********************************************************************************
    while (!quit) {
 
 
@@ -145,11 +153,12 @@ int main(int argc, char ** argv)
       {
          viewer->spinOnce(100);
 
+         // Sleep thread for a bit
          boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 
          input_mutex->lock();
          if (received_input) {
-            input_mutex->unlock(); // :)
+            input_mutex->unlock(); 
             break;
          }
          input_mutex->unlock();
@@ -173,10 +182,9 @@ int main(int argc, char ** argv)
          if (cmd_name == "load") {
             if (open_file(args) == 0) {
                viewer->addPointCloud<point_t>(m_cloud, "sample cloud");
-               viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud");
-
                viewer->addCoordinateSystem();
             }
+
          } else if (cmd_name == "quit") {
 
             quit = true;  // will end the program
@@ -184,10 +192,6 @@ int main(int argc, char ** argv)
          } else if (cmd_name == "segment") {
 
             segment(args);
-
-         } else if (cmd_name == "segment2") {
-
-            segment2(args);
 
          } else if (cmd_name == "remove") {
 
@@ -205,13 +209,13 @@ int main(int argc, char ** argv)
             
             adjust_plane(args);
 
-         } else if (cmd_name == "remove_plane") {
-
-            remove_plane(args);
 
          } else {
 
-            cout << "Command not recognized." << endl;;
+            if (cmd_name != "help") {
+               cout << "Command not recognized." << endl;
+            }
+            display_help();
          }
 
 
@@ -222,6 +226,17 @@ int main(int argc, char ** argv)
    return 0;
 }
 
+void display_help()
+{
+   cout << "Commands: " << endl;
+   cout << "<load> - load sample cloud" << endl;
+   cout << "<quit> - quit program" << endl;
+   cout << "<segment> - detect plane" << endl;
+   cout << "<remove> - remove plane if detected" << endl;
+   cout << "<eucl> - euclidian clustering" << endl;
+   cout << "<camera> - retrieve point cloud from Kinect" << endl;
+   cout << "<plane> - segment point clud into an 'above/below' plane" << endl;
+}
 
 int segment_camera(arg_list input) {
    return 0;
@@ -235,6 +250,7 @@ int segment(arg_list input)
       return -1;
    }
 
+   // Segmentation object
    pcl::SACSegmentation<point_t>       seg;
    
    // Optional? TODO investigate
@@ -257,7 +273,7 @@ int segment(arg_list input)
       return -1;
    } else {
 
-      // Colour points in the plane.
+      // Colour points in the plane. // TODO make a convenience method
       for (std::vector<int>::const_iterator it = plane_inliers->indices.begin(); it != plane_inliers->indices.end(); ++it)
       {
          m_cloud->points[*it].r = 0;
@@ -274,95 +290,22 @@ int segment(arg_list input)
    return 0;
 }
 
-// 1. Segment.
-// 2. Draw Normal to Plane if found.
-int segment2(arg_list input)
-{
-   if (!point_cloud_loaded) {
-      cerr << "No point cloud has been loaded! Not segmenting.." << endl;
-      return -1;
-   }
 
-   printf("Before anything, floor coef contains %0lu elements.\n", floor_coef->values.size());
-
-   pcl::SACSegmentation<point_t>    seg;
-
-   // Configure segmentation object
-   seg.setOptimizeCoefficients(true);
-   seg.setModelType(pcl::SACMODEL_PLANE);
-   seg.setMethodType(pcl::SAC_RANSAC);
-   seg.setMaxIterations(1000);
-   seg.setDistanceThreshold(0.01);
-
-   seg.setInputCloud(m_cloud);
-   seg.segment(*plane_inliers, *floor_coef);
-
-   std::cout << "Point Cloud representing plane: " << plane_inliers->indices.size() << " points, out of " << m_cloud->points.size() << " points." << endl;
-
-   // TODO write this operator somewhere
-   cout << "Plane representation: (x, y, z, d) = (" << floor_coef->values[0] << ", " << floor_coef->values[1] << ", " << floor_coef->values[2] << ", " << floor_coef->values[3] << ")" << endl;
-
-   // Draw normal vector?
-   //
-   // Add first plane?
-
-// viewer->addPlane(*floor_coef, "plane_one");
-
-   /* HACK BEGIN */
-
-   // Add a second plane slightly above the first plane
-   //
-   // Add a third plane slightly below the first plane
-
-
-   // Allow user to move plane back and forth using arrow keys..
-   //
-
-   pcl::ModelCoefficients::Ptr   variable_coef (new pcl::ModelCoefficients());
-   variable_coef->values = floor_coef->values;
-
-
-   viewer->addPlane(*variable_coef, "plane");
-   viewer->updatePointCloud(m_cloud, "sample cloud");
-
-   
-   char key;
-   float granularity = 0.25;
-   bool displayD = false;
-   cout << "Waiting for keypress. Press 'q' to quit." << endl;
-   while (true) {
-      key = cin.get();
-      displayD = false;
-      if (key == 'o') {
-         variable_coef->values[3] += granularity;
-         displayD = true;
-      } else if (key == 'i'){
-         variable_coef->values[3] -= granularity;
-         displayD = true;
-      } else if (key == 'q') {
-         break;
-      }
-
-      if (displayD) {
-         viewer->removeShape("plane");
-         cout << "D: " << variable_coef->values[3] << endl;
-         viewer->addPlane(*variable_coef, "plane");
-         viewer->updatePointCloud(m_cloud, "sample_cloud");
-      }
-   }
-
-   /* HACK END */
-
-
-   return -1;
-
-}
-
+/* 
+ * ======================================================================================
+   Function       : open_file
+   Description    : 
+      - Loads a custom .pcd file into "m_cloud". This will update the visualizer
+        with a rendering of said cloud.
+        All points in m_cloud are coloured white (255, 255, 255).
+   Arguments      : 
+      - arg_list  : a list of arguments to the function, currently ignored.
+                    TODO take in a filename.
+   Returns        : 0 if successsful, non-zero if there was an error loading the file.
+   ====================================================================================== 
+*/
 int open_file(arg_list input)
 {
-// string filename = input.front();
-// const string filename = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/vision/pcl_segmentation/table_scene_lms400.pcd"; // TODO FOR NOW
-// const string filename = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/data/saved_kinect_pcd.pcd"; // TODO FOR NOW
    const string filename = "../../../data/saved_kinect_pcd.pcd";
    cout << "Opening: " << filename << endl;
 
@@ -387,6 +330,16 @@ int open_file(arg_list input)
    }
 }
 
+/* 
+ * ======================================================================================
+   Function       : remove_segment
+   Description    : Removes all points at the indices specified in "plane_inliers" from 
+                    the point cloud "m_cloud".
+   Arguments      : 
+      - arg_list  : A list of arguments. Not used by this function.
+   Returns        : 0 if successful.
+   ====================================================================================== 
+*/
 int remove_segment(arg_list input)
 {
    pcl::ExtractIndices<point_t>     extract;
@@ -398,11 +351,18 @@ int remove_segment(arg_list input)
 
    viewer->updatePointCloud(m_cloud, "sample cloud");
 
-   return 1;
+   return 0;
 }
 
 
-// Capture a point cloud from the camera and display it
+/* 
+ * ======================================================================================
+   Function       : capture_from_camera
+   Description    : Overwrites "m_cloud" with data from the Kinect.
+   Arguments      : arg_list : a list of arguments that is ignored.
+   Returns        : 0 if successful.
+   ====================================================================================== 
+*/
 int capture_from_camera(arg_list input) {
    
    cloud_mutex->lock();
@@ -426,8 +386,6 @@ int capture_from_camera(arg_list input) {
 
    *m_cloud = *m_cam_cloud;
 
-// viewer->removePointCloud("sample cloud");
-// viewer->addPointCloud(m_cloud, "sample cloud");
    viewer->updatePointCloud(m_cloud, "sample cloud");
 
    point_cloud_loaded = true;
@@ -437,10 +395,14 @@ int capture_from_camera(arg_list input) {
    return 0;
 }
 
-int remove_plane(arg_list input) {
-   return -1;
-}
-
+/* 
+ * ======================================================================================
+   Function       : adjust_plane
+   Description    : Segments m_cloud into a portion above the plane and below the plane.
+   Arguments      : arg_list : ignored.
+   Returns        : 0 if successful.
+   ====================================================================================== 
+*/
 int adjust_plane(arg_list input) {
 
    if (!got_plane || floor_coef->values.size() == 0) {
@@ -474,13 +436,10 @@ int adjust_plane(arg_list input) {
 
    pcl::PointIndices::Ptr below_plane_indices(new pcl::PointIndices());
    pcl::PointIndices::Ptr above_plane_indices(new pcl::PointIndices());
-// std::vector<int> below_plane_indices; 
-// std::vector<int> above_plane_indices;
 
    clipper.clipPointCloud3D(*m_cloud, below_plane_indices->indices);
    printf("After clipping: %0lu points below the plane.\n", below_plane_indices->indices.size());
 
-// viewer->updatePointCloud(m_cloud, "sample cloud");
    viewer->removePointCloud("sample cloud");
 
    m_cloud_above = pcl::PointCloud<point_t>::Ptr(new pcl::PointCloud<point_t>);
@@ -500,6 +459,7 @@ int adjust_plane(arg_list input) {
       (*it).g = 255;
       (*it).b = 0;
    }
+
 
    // Extract points below the floor into a point cloud.
    pcl::ExtractIndices<point_t>  extract_below;
@@ -526,7 +486,14 @@ int adjust_plane(arg_list input) {
 
 }
 
-// Extract everything into two clusters.
+/* 
+ * ======================================================================================
+   Function       : euclidean_extraction
+   Description    : Segments m_cloud using euclidean clustering.
+   Arguments      : arg_list : ignored.
+   Returns        : 0 if successful.
+   ====================================================================================== 
+*/
 int euclidean_extraction(arg_list input) {
 
    // RIght now: test results using example code given online.
@@ -536,8 +503,9 @@ int euclidean_extraction(arg_list input) {
    std::vector<pcl::PointIndices>      cluster_indices;
 
    std::vector<int> nan_indices;
-   pcl::removeNaNFromPointCloud(*m_cloud_above, *m_cloud_above, nan_indices);
 
+   // Not sure why/how these got in...
+   pcl::removeNaNFromPointCloud(*m_cloud_above, *m_cloud_above, nan_indices);
    cout << "`NaN`s in m_cloud_above: " << nan_indices.size() << endl;
 
    search_tree->setInputCloud(m_cloud_above);
@@ -551,14 +519,119 @@ int euclidean_extraction(arg_list input) {
    ec.extract(cluster_indices);
 
    printf("After Euclidean extraction: number of clusters = %0lu\n", cluster_indices.size());
+
+   for (int i = 0; i < cluster_indices.size(); i++)
+   {
+      // Colour these joints
+      // These cluster indices are in m_cloud_above.
+                                     
+      const int r_val = colours::colours[i].red;
+      const int g_val = colours::colours[i].green;
+      const int b_val = colours::colours[i].blue;
+
+      for (std::vector<int>::const_iterator it = cluster_indices[i].indices.begin(); it != cluster_indices[i].indices.end(); ++it)
+      {
+         m_cloud_above->points[*it].r = r_val;
+         m_cloud_above->points[*it].g = g_val;
+         m_cloud_above->points[*it].b = b_val;
+      }
+
+   }
+
+   // Update the point cloud.
+   viewer->updatePointCloud(m_cloud_above, "abovePlane");
+
+   // Doing this here...
+   cluster_lines(m_cloud_above, cluster_indices, floor_coef);
    
-   return -1;
-
-}
-
-int adjust_seg_threshold(arg_list input) {
    return 0;
 }
+
+// TODO:
+//    for each cluster compute its 3-d mean.
+//    project that point on to the detected plane; draw a line from the mean to its plane projection.
+void cluster_lines(pcl::PointCloud<point_t>::Ptr   cloud,
+                   std::vector<pcl::PointIndices>  &clusters,
+                   pcl::ModelCoefficients::Ptr     floor_coefficients)
+{
+   // Compute the means of everything in "clusters".
+   const int   num_clusters = clusters.size();
+   std::vector<CentroidPoint<point_t> > centroids (num_clusters); // may affect performance; it's also averaging RGBA
+
+#ifdef VERBOSE
+   cout << "cluster_lines(): number of clusters = " << num_clusters << endl;
+#endif 
+
+   pcl::PointCloud<point_t>::Ptr    centroid_cloud = pcl::PointCloud<point_t>::Ptr(new pcl::PointCloud<point_t>);
+   pcl::PointCloud<point_t>::Ptr    centroid_proj = pcl::PointCloud<point_t>::Ptr(new pcl::PointCloud<point_t>);
+
+   for (int clust = 0; clust < num_clusters; clust++)
+   {
+      for (std::vector<int>::const_iterator it = clusters[clust].indices.begin();
+            it != clusters[clust].indices.end();
+            ++it)
+      {
+         centroids[clust].add(cloud->points[*it]);
+      }
+
+      // Then "get" the centroid..
+      point_t  centroid_point;
+      centroids[clust].get(centroid_point);
+      centroid_point.r = 255;
+      centroid_point.g = 255;
+      centroid_point.b = 255;
+
+      // add it to the point cloud...
+      centroid_cloud->points.push_back(centroid_point);
+
+      // get its projection on to the main plane
+   }
+
+   // Add the centroid cloud to the main viewer
+   viewer->addPointCloud<point_t>(centroid_cloud, "centroids");
+   viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "centroids");
+
+   viewer->removePointCloud("abovePlane");
+   viewer->removePointCloud("belowPlane");
+   viewer->updatePointCloud(centroid_cloud, "centroids");
+
+// for (pcl::PointCloud<point_t>::iterator it = centroid_cloud->begin();
+//       it != centroid_cloud->end();
+//       ++it)
+// {
+//    point_t projection_point;
+//    centroid_proj->points.push_back(
+// }
+
+   pcl::ProjectInliers<point_t> proj;
+   proj.setModelType(pcl::SACMODEL_PLANE);
+   proj.setInputCloud(centroid_cloud);
+   proj.setModelCoefficients(floor_coefficients);
+   proj.filter(*centroid_proj);
+
+   viewer->addPointCloud<point_t>(centroid_proj, "centroid projections");
+   for (pcl::PointCloud<point_t>::iterator it = centroid_proj->begin();
+         it != centroid_proj->end(); ++it) {
+      it->r = colours::colours[colours::PURPLE].red;
+      it->g = colours::colours[colours::PURPLE].green;
+      it->b = colours::colours[colours::PURPLE].blue;
+   }
+   viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "centroid projections");
+   viewer->updatePointCloud(centroid_proj, "centroid projections");
+
+   // And draw lines
+
+   // TODO unique identifiers for lines
+   for (int clust = 0; clust < num_clusters; clust++)
+   {
+      viewer->addLine(centroid_cloud->points[clust], centroid_proj->points[clust], 
+            colours::colours[clust % NUM_COLOURS].red,
+            colours::colours[clust % NUM_COLOURS].green,
+            colours::colours[clust % NUM_COLOURS].blue);
+   }
+}
+
+
 
 
 

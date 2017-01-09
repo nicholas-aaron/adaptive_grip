@@ -443,8 +443,7 @@ void execute_command(const string& command, Robot & robot)
    string      name        = args.front();
    args.pop_front();
 
-   bool        found       = false;
-
+   bool        found       = false; 
    int i = 0;
 
    // cout << "execute_command(): Name = <" << name << ">" << endl;
@@ -504,8 +503,7 @@ int main(int argc, char * argv[])
    // Initialize the robot
 // Robot robot("/dev/gantry");
    Robot robot("/dev/cu.usbserial");
-   robot.home();
-
+   robot.home(); 
    while (!quit) {
       char * input = readline(Prompt.c_str());
       if (input) {

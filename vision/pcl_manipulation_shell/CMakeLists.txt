@@ -10,10 +10,7 @@ find_package(PCL 1.2 REQUIRED)
 find_package(Readline REQUIRED)
 
 include_directories(${PCL_INCLUDE_DIRS} ${Readline_INCLUDE_DIR})
-
 include_directories(${INCLUDE_DIRECTORIES} /Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/headers)
-
-
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 

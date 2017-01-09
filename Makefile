@@ -4,6 +4,10 @@
 #	Purpose	: Makefile used to build:
 #						- Object files from 'original' code
 #						- New Executables
+#
+#
+#  #### NOTE THAT I AM GOING TO DEPRECATE THIS
+#  #### IN FAVOUR OF USING CMAKE
 # ===================================================
 
 
@@ -11,12 +15,19 @@
 DEFINES=
 
 # Directory housing the 'original' source code files.
-ORIGDIR=/home/robot/Documents/Group3/original
+GROUP3=/Users/amnicholas/Documents/ELEC490/Group3
+ORIGDIR=$(GROUP3)/original
 ORIGINAL_SRC=$(ORIGDIR)/src
+EXT_SRC=src
 
-INCLUDE=-I$(ORIGDIR)/headers -I/$(LIBDIR)
+# TODO this is a hack
+PCL=-I
+
+INCLUDE=-I$(ORIGDIR)/headers -I$(LIBDIR) -Iheaders
 
 # Location where object files will be placed
+BASE_OBJDIR=base_objects
+EXT_OBJDIR=ext_objects
 OBJDIR=objects
 
 # =============================================
@@ -53,7 +64,11 @@ COMMON_OBJECTS_BASE= \
 # Newer Objects
 # =============================================
 COMMON_OBJECTS_EXT= \
-	$(EXT_OBJDIR)/RobotExt.o
+	$(EXT_OBJDIR)/Camera.o
+#$(EXT_OBJDIR)/RobotExt.o \
+	$(EXT_OBJDIR)/Camera.o
+
+
 
 
 # ==================================================
@@ -63,7 +78,7 @@ $(BASE_OBJDIR)/%.o : $(ORIGINAL_SRC)/%.cpp $(wildcard headers/%.h)
 	g++ -g $(DEFINES) $(INCLUDE) -c $< -o $@
 
 $(EXT_OBJDIR)/%.o : $(EXT_SRC)/%.cpp $(wildcard headers/%.h)
-	g++ -g $(DEFINES) $(INCLUDE) -c $< -o $@
+	g++ -g $(DEFINES) $(INCLUDE) $(PCL) -c $< -o $@
 
 # ==================================================
 # Default: Make all of the executables
