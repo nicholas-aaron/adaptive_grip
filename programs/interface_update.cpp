@@ -21,7 +21,8 @@ void send_and_poll(Robot &r);
 int main (int argc, char *argv[]) {
 	char choose;
 	cout << "Connecting..." << endl;
-	Robot r = Robot("/dev/gantry", "/home/kevin/Documents/ECEGantry/RobotV2/robot_limits.dat");
+///Robot r = Robot("/dev/gantry", "/home/kevin/Documents/ECEGantry/RobotV2/robot_limits.dat");
+   Robot r = Robot("/dev/cu.usbserial");
 	cout << "Connected to Gantry" << endl;
 	while (true) {
 		do {

@@ -13,7 +13,7 @@
 #include <pcl/visualization/pcl_visualizer.h>
 
 // Debug log macro
-#define LOG(x) cout << x << endl
+#define LOG(x) std::cout << x << std::endl
 
 using std::cout;
 using std::endl;
@@ -172,13 +172,6 @@ public:
         interface->stop ();
     }
 };
- 
-// int main ()
-// {
-//     SimpleOpenNIViewer v;
-//     v.run ();
-//     return 0;
-// }
 
 
 // Let's try to capture a .pcd file from the kinect and write it to file.
