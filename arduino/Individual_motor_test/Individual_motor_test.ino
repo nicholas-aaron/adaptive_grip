@@ -52,8 +52,9 @@ void setup() {
 
 //Main loop
 void loop() {
-  
-      //userInput = Serial.read(); //Read user input and trigger appropriate function      
+      
+      //userInput = Serial.read(); //Read user input and trigger appropriate function 
+      /*     
       String input = String(1);
       controlMotor((int)(6+1));
       Serial.println("Moving motor number " + input);
@@ -61,6 +62,50 @@ void loop() {
       driveMotor(desiredDegrees,1,HIGH);
       resetEDPins();
       while(1){};
+      */
+      /*
+      controlMotor(1+6);
+      driveMotor(360,1,HIGH);
+      //resetEDPins();
+
+      controlMotor(2+6);
+      driveMotor(360,1,HIGH);
+      //resetEDPins();
+      
+      controlMotor(3+6);
+      driveMotor(360,1,HIGH);
+      //resetEDPins();
+      
+      controlMotor(4+6);
+      driveMotor(360,1,HIGH);
+      //resetEDPins();
+      
+      controlMotor(5+6);
+      driveMotor(360,1,HIGH);
+      //resetEDPins();
+      
+      controlMotor(6+6);
+      driveMotor(360,1,HIGH);
+      //resetEDPins();
+      */
+      digitalWrite(EN_1, LOW);
+      digitalWrite(EN_2, LOW);
+      digitalWrite(EN_3, LOW);
+      digitalWrite(EN_4, LOW);
+      digitalWrite(EN_5, LOW);
+      digitalWrite(EN_6, LOW);
+      for(x= 0; x<1000; x++)  //Loop the forward stepping enough times for motion to be visible
+      {
+        digitalWrite(stp,HIGH); //Trigger one step forward
+        delay(1);
+        digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
+        delay(1);
+      }
+      resetEDPins();
+
+      //holdPosition();
+      delay(5000);
+      //resetEDPins();  
 }
 
 

@@ -1,3 +1,10 @@
+/**
+ * function: controlMotor
+ * Enables one of the 6 gripper motors to turn by setting its enable pin to "LOW"
+ * 
+ * motorID: integer ID of the motor
+ */
+
 void controlMotor(int motorID)
 {
   switch(motorID)
@@ -37,6 +44,17 @@ void controlMotor(int motorID)
   
 }
 
+/**
+ * Function: driveMotor
+ * 
+ * Rotates the motor(s) by a specified number of degrees at full, half, quarter or eight step speed in
+ * either clockwise or counter-clockwise direction
+ * 
+ * degrees: amount by which the motor is rotated
+ * stepStyle: absolute change in angular displacement motor takes with each 'step'
+ * highOrLow: the direction that the motor will rotate; CW vs CCW
+ */
+
 void driveMotor(int degrees, int stepStyle, uint8_t highOrLow )
 {
   int rotate = 0;
@@ -50,7 +68,7 @@ switch(stepStyle){
     break;
   }
   case 1: { // Half Step
-    Serial.print("Moving at half step mode.");
+    Serial.println("Moving at half step mode.");
     digitalWrite(MS1, HIGH); 
     digitalWrite(MS2, LOW);
     rotate = 2*(int)(degrees/1.8);
@@ -79,10 +97,15 @@ switch(stepStyle){
     digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
     delay(1);
     count2++;
-    
   }
 }
 
+
+/**
+ * Function: Reset pins
+ * 
+ * Disables all 6 motors from moving.  Changes motor step size to full step.
+ */
 void resetEDPins()
 {
   digitalWrite(stp, LOW);
@@ -99,6 +122,10 @@ void resetEDPins()
 
 void holdPosition()
 {
-  // Keep enable low to hold position
-  //digitalWrite(EN,LOW);  
+  digitalWrite(EN_1, LOW);
+  digitalWrite(EN_2, LOW);
+  digitalWrite(EN_3, LOW);
+  //digitalWrite(EN_4, LOW);
+  //digitalWrite(EN_5, LOW);
+  //digitalWrite(EN_6, LOW);
 }
