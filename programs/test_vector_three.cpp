@@ -32,16 +32,17 @@ public :
    Camera<Point>     camera;
 
 
-   Point xRegVector, yRegVector;
+   // TODO couple these
+   Point          xRegVector, yRegVector;
+   float          xRegDelta,  yRegDelta;
+
    Point planeNormal;
-
-
 
    PointCloud::Ptr      rcloud_src;
    PointCloud::Ptr      rcloud_tgt;
 
    int vp_left, vp_right;
-   int vp_botright, vp_botleft, vp_topleft, vp_topright;
+   int vp_calibration_vectors, vp_navigation_clouds, vp_calibration_clouds, vp_topright;
 
    PointCloud::Ptr      clusters;
    
@@ -62,10 +63,10 @@ public :
       camera(camcloud, mutex)
    {
       bind_functions();
-      viewer->createViewPort(0.0, 0.0, 0.5, 0.5, vp_topleft);
+      viewer->createViewPort(0.0, 0.0, 0.5, 0.5, vp_calibration_clouds);
       viewer->createViewPort(0.5, 0.0, 1.0, 0.5, vp_topright);
-      viewer->createViewPort(0.0, 0.5, 0.5, 1.0, vp_botleft);
-      viewer->createViewPort(0.5, 0.5, 1.0, 1.0, vp_botright);
+      viewer->createViewPort(0.0, 0.5, 0.5, 1.0, vp_navigation_clouds);
+      viewer->createViewPort(0.5, 0.5, 1.0, 1.0, vp_calibration_vectors);
 
 
       clusters.reset(new PointCloud());
@@ -91,6 +92,9 @@ public :
 
       Shell::callback analyze = boost::bind(&TestVectorShell::analyze, this, _1);
       register_function(analyze, "ana", "ana");
+
+      Shell::callback mcc = boost::bind(&TestVectorShell::move_to_closest_cluster, this, _1);
+      register_function(mcc, "mcc", "mcc");
    }
 
    void pos(arg_list args)
@@ -159,6 +163,52 @@ public :
 
    }
 
+   void moveXRel(float amt)
+   {
+      RobotPosition new_pos = robot.currentPos();
+      new_pos.x = new_pos.x + amt;
+
+      // TODO check validity of new position
+      std::cerr << "TODO: moveXRel() - Implement a validity check of the new X Location!" << std::endl;
+
+      xRegDelta = amt;
+
+      cout << "New Position: " << endl;
+      cout << new_pos << endl;
+
+      robot.moveTo(new_pos);
+
+      string reply;
+      robot.controller >> reply;
+      if (reply != "") {
+         cout << "Reply: " << endl << reply << endl;
+      }
+   }
+
+   void moveYRel(float amt)
+   {
+   {
+      RobotPosition new_pos = robot.currentPos();
+      new_pos.y = new_pos.y + amt;
+
+      // TODO check validity of new position
+      std::cerr << "TODO: moveYRel() - Implement a validity check of the new Y Location!" << std::endl;
+
+      yRegDelta = amt;
+
+      cout << "New Position: " << endl;
+      cout << new_pos << endl;
+
+      robot.moveTo(new_pos);
+
+      string reply;
+      robot.controller >> reply;
+      if (reply != "") {
+         cout << "Reply: " << endl << reply << endl;
+      }
+   }
+   }
+
 
 
    // TODO move to utils
@@ -183,7 +233,7 @@ public :
       camera.retrieve();
       *rcloud_src = *camcloud;
          PointCloudColorHandlerCustom<Point> handler_red_1(rcloud_src, 255, 0, 0);
-         viewer->addPointCloud(rcloud_src, handler_red_1, "RCloudOneUnfiltered", vp_topleft);
+         viewer->addPointCloud(rcloud_src, handler_red_1, "RCloudOneUnfiltered", vp_calibration_clouds);
    }
 
 
@@ -194,7 +244,7 @@ public :
       camera.retrieve();
       *rcloud_tgt = *camcloud;
          PointCloudColorHandlerCustom<Point> handler_blue_1(rcloud_tgt, 0, 0, 255);
-         viewer->addPointCloud(rcloud_tgt, handler_blue_1, "RCloudTwoUnfiltered", vp_topleft);
+         viewer->addPointCloud(rcloud_tgt, handler_blue_1, "RCloudTwoUnfiltered", vp_calibration_clouds);
    }
 
    
@@ -247,7 +297,7 @@ public :
       {
          std::cerr << "clusterDifference() - located more than one cluster in one of the point clouds." << std::endl;
          std::cerr << "Returning false." << std::endl;
-         return false;
+         return FAILURE;
       }
 
       Point source_cluster = source_clusters->points[0];
@@ -261,13 +311,29 @@ public :
 
       subtractXYZ(target_cluster, source_cluster, difference);
 
-      return true;
+      return SUCCESS;
    }
 
    void regX(arg_list args)
    {
       load1(args); // Load first point cloud and display.
-      move(args);
+   // move(args);
+
+      float move_x_amt;
+      // Pop arguments off
+      if (args.empty()) { 
+         cout << "No arguments provided. Returning." << endl;
+         return;
+      } else {
+         move_x_amt = atof(args.front().c_str());
+         if (move_x_amt != move_x_amt) {
+            cout << "Illegal argument. Exiting." << endl;
+            return;
+         }
+      }
+
+      moveXRel(move_x_amt);
+      
       load2(args); // Load second point cloud and display.
 
 //    Point difference;
@@ -287,17 +353,32 @@ public :
 
       Cluster<Point> originCluster(0.0, 0.0, 0.0);
       Point originProjection = originCluster.get_plane_projection(floor_plane);
-
       addXYZ(originProjection, xRegVector, difference_fp);
-      viewer->addLine(originProjection, difference_fp, 214, 0, 255, "XRegLine", vp_botright);
+      viewer->removeShape("XRegLine");
+      viewer->addLine(originProjection, difference_fp, 214, 0, 255, "XRegLine", vp_calibration_vectors); // magenta
 
-      scene_setup(vp_botright, floor_plane, clusters);
+      scene_setup(vp_calibration_vectors, floor_plane, clusters);
    }
 
    void regY(arg_list args)
    {
       load1(args);
-      move(args);
+//    move(args);
+
+      float move_y_amt;
+      // Pop arguments off
+      if (args.empty()) { 
+         cout << "No arguments provided. Returning." << endl;
+         return;
+      } else {
+         move_y_amt = atof(args.front().c_str());
+         if (move_y_amt != move_y_amt) {
+            cout << "Illegal argument. Exiting." << endl;
+            return;
+         }
+      }
+      moveYRel(move_y_amt);
+
       load2(args);
 
       Point difference;
@@ -306,12 +387,17 @@ public :
       PointCloud::Ptr clusters(new PointCloud());
       bool result = clusterDifference(yRegVector, rcloud_src, rcloud_tgt, floor_plane, clusters);
 
+      planeNormal.x = floor_plane(0);
+      planeNormal.y = floor_plane(1);
+      planeNormal.z = floor_plane(2);
+
       Point difference_fp; // Difference, on floor plane
       Cluster<Point> originCluster(0.0, 0.0, 0.0);
       Point originProjection = originCluster.get_plane_projection(floor_plane);
 
       addXYZ(originProjection, yRegVector, difference_fp);
-      viewer->addLine(originProjection, difference_fp, 255, 165, 0, "YRegLine", vp_botright);
+      viewer->removeShape("YRegLine");
+      viewer->addLine(originProjection, difference_fp, 255, 165, 0, "YRegLine", vp_calibration_vectors); // yellow
 
       viewer->updatePointCloud(clusters, "Clusters");
    }
@@ -324,7 +410,7 @@ public :
       std::cout << "xy_angle_degrees = " << xy_angle_degrees << std::endl;
 
       float xz_angle_rads = PCLUtils::angleBetween(xRegVector, planeNormal);
-      float xz_angle_degrees = acos(xz_angle_degrees) * 180.0 / 3.14159;
+      float xz_angle_degrees = acos(xz_angle_rads) * 180.0 / 3.14159;
 
       std::cout << "xz_angle_degrees = " << xz_angle_degrees << std::endl;
 
@@ -334,170 +420,99 @@ public :
       std::cout << "yz_angle_degrees = " << yz_angle_degrees << std::endl;
    }
 
-   void reg3(arg_list args)
+
+   void move_to_closest_cluster(arg_list args)
    {
-      PointCloud::Ptr      reg_output(new PointCloud);
-      Mutex                m;
-      Eigen::Matrix4f      transform;
-      /* Capture rcloud_src and rcloud_tgt */
-//    viewer->removePointCloud("RCloudOne");
-//    viewer->removePointCloud("RCloudTwo");
+      /*
+       * Retrieve Point Cloud
 
-//    rcloud_src.reset(new PointCloud);
-//    Camera<Point> cam (cam_buffer, &m);
-// // engine->get_image();
-//    cam.retrieve();
-//    *rcloud_src = *cam_buffer;
+       * Filter plane and find clusters
+       * iterate through clusters and find the closest on to the "clawPoint"
+       *    (currently (0, 0, 0) but this shoudl change...
+       * Get the vector from the "clawPoint" to the closest cluster.
+       * project it on to the X and Y basis vectors.
+       * Translate the projections into a RobotPosition using the positions
+       * from calibration.
+       * Move to that position.
+       */
 
-//    move(args);
+      // Show: 
+      //    Filtered Cloud
+      //    Centroids
+      //    Projections
+      //    Line from Origin to plane
 
-//    rcloud_tgt.reset(new PointCloud);
-//    engine->get_image();
-//    cam.retrieve();
-//    *rcloud_tgt = *cam_buffer;
+      // Use the "botright" viewport.
 
+      // Retrieve Point Cloud
+      PointCloud::Ptr      origCloud(new PointCloud);
+      PointCloud::Ptr      clusterCloud;
+      camera.retrieve();
+      *origCloud = *camcloud;
+
+
+      // Filter plane and find clusters
+      Mutex m; 
       
-      
-      /* Display the unfilitered point clouds on the top right.. */
-      std::cout <<  "Before filter: rcloud_src->size() = " << rcloud_src->size() << std::endl;
-      std::cout <<  "Before filter: rcloud_tgt->size() = " << rcloud_tgt->size() << std::endl;
+      TwoPlaneFilter<Point> filt(origCloud, &m);
+      filt.filter_plane();
 
-      /* Filter the Point Clouds */
-      TwoPlaneFilter<Point> tp2(rcloud_tgt, &m);
-      tp2.filter_plane();
-      TwoPlaneFilter<Point> tp1(rcloud_src, &m);
-//    tp2.set_input_cloud(rcloud_src);
-      tp1.filter_plane();
-      // TODO there's an error with using the same TwoPlaneFilter with two different point clouds..
+      PointCloudColorHandlerCustom<Point>    handler_cyan(origCloud, 0, 255, 255);
+      viewer->removePointCloud("TestCloud");
+      viewer->addPointCloud(origCloud, handler_cyan, "TestCloud", vp_navigation_clouds);
 
 
-//    return;
 
-      /* Display original point clouds on bottom right. */
-     
-      PointCloudColorHandlerCustom<Point> handler_red_2(rcloud_src, 255, 0, 0);
-      viewer->addPointCloud(rcloud_src, handler_red_2, "RCloudOne", vp_botright);
-      PointCloudColorHandlerCustom<Point> handler_blue_2(rcloud_tgt, 0, 0, 255);
-      viewer->addPointCloud(rcloud_tgt, handler_blue_2, "RCloudTwo", vp_botright);
-      
+      ClusterFinder<Point> finder(origCloud, &m);
+      finder.find_clusters();
+      clusterCloud = finder.get_clusters();
 
-      std::cout <<  "After filter: rcloud_src->size() = " << rcloud_src->size() << std::endl;
-      std::cout <<  "After filter: rcloud_tgt->size() = " << rcloud_tgt->size() << std::endl;
-
-
-      /* Then, try to register the point clouds */
-      PCLUtils::pairAlign<Point>(rcloud_src, rcloud_tgt, reg_output, transform, logger);
-
-      // Scratch:
-      // by applying the "transform" to cf2 (target), you get back the points in cf1 (source).
-      // the "transform" is the target-to-source transform. Can invert it (Matrix.inverse()) to get
-      // source-to-target.
+      // Add 
       //
-      /* Display the source centroids (blue),
-       * Target cloud centroids (red),
-       * and estimate-target centroids (Green),
-       *
-       * LIMIT to one centroid */
-      ClusterFinder<Point>    cf(rcloud_src, &m);
-      cf.find_clusters();
-      PointCloud::Ptr clusters_src = cf.get_clusters();
-      std::cout << "clusters_src.size() = " << clusters_src->size() << std::endl;
 
-      ClusterFinder<Point>    cf2(rcloud_tgt, &m);
-    //cf.setInputCloud(rcloud_tgt);
-      cf2.find_clusters();
-      PointCloud::Ptr clusters_tgt = cf2.get_clusters();
-      std::cout << "clusters_tgt.size() = " << clusters_tgt->size() << std::endl;
-      // TODO same thing with the clusterFinder. use two of them.
-
-      /* Calculate the estimate of the source */
-      Eigen::Affine3f transform_affine;
-      transform_affine.matrix() = transform.matrix();
-      PointCloud::Ptr   src_centroids_est(new PointCloud);
-      pcl::transformPointCloud(*clusters_src, *src_centroids_est, transform_affine);
-
-      Eigen::Vector4f tmp_plane = tp2.get_plane_coefficients();
-      int lineNum = 0;
-      std::cout << "From clusters_tgt..." << std::endl;
-      for (std::vector<Point>::iterator i = clusters_tgt->begin();
-            i != clusters_tgt->end(); i++)
-      {
-         Cluster<Point> c (*i);
-         Point    projection = c.get_plane_projection(tmp_plane);
-         std::stringstream lineName;
-         lineName << "Line" << (lineNum++);
-         viewer->addLine(c.m_location, projection, lineName.str().c_str(), vp_botleft);
-         // ALSO, OUTPUT THE POINT...
-         std::cout << "CLUSTER " << lineNum << ": x = " << (*i).x <<
-            ", y = " << (*i).y << ", z = " << (*i).z << std::endl;
-      }
-
-      std::cout << "From clusters_src..." << std::endl;
-      for (std::vector<Point>::iterator i = clusters_src->begin();
-            i != clusters_src->end(); i++)
-      {
-         Cluster<Point> c (*i);
-         Point    projection = c.get_plane_projection(tmp_plane);
-         std::stringstream lineName;
-         lineName << "Line" << (lineNum++);
-         viewer->addLine(c.m_location, projection, lineName.str().c_str(), vp_botleft);
-         std::cout << "CLUSTER " << lineNum << ": x = " << (*i).x <<
-            ", y = " << (*i).y << ", z = " << (*i).z << std::endl;
-      }
-
-//    viewer->addPlane(*(tp2.m_plane), "tp2.m_plane");
-
-      Point origin; origin.x = 0.0, origin.y = 0.0, origin.z = 0.0;
-      origin.r = 255; origin.g = 255; origin.b = 255;
-      Cluster<Point> originCluster(origin);
-      Point originProjection = originCluster.get_plane_projection(tmp_plane);
-      viewer->addLine(origin, originProjection, "originLine", vp_botleft);
-      
-
-      /* Now Show the Estimate Centroids (Green), Source Centroids (Blue), Target Centroids (Red) */
-      {
-         PointCloudColorHandlerCustom<Point> handler_red(clusters_src, 255, 0, 0);
-         viewer->addPointCloud(clusters_src, handler_red, "ClustersSrc", vp_botleft);
-
-         PointCloudColorHandlerCustom<Point> handler_blue(clusters_tgt, 0, 0, 255);
-         viewer->addPointCloud(clusters_tgt, handler_blue, "ClustersTgt", vp_botleft);
-
-         
-
-         PointCloudColorHandlerCustom<Point> handler_green(src_centroids_est, 0, 255, 0);
-         viewer->addPointCloud(src_centroids_est, handler_green, "ClustersSrcEst", vp_botleft);
-
-         viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "ClustersSrc");
-         viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "ClustersTgt");
-         viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "ClustersSrcEst");
-      }
-      
-
-      if (clusters_src->size() != 1 || clusters_tgt->size() != 1)
-      {
-         std::cerr << "Error - more than one cluster in source/target cluster clouds. " << std::endl;
-         std::cerr << "When attempting to get vector from source clusters to target cluster" << std::endl;
+      if (clusterCloud->size() != 1 ) {
+         std::cerr << "move_to_closest_cluster() only implemented for a single cluster." << endl;
          return;
       }
 
-      pcl::PointXYZ tmp_originProjection; tmp_originProjection.x = originProjection.x;
-      tmp_originProjection.y = originProjection.y;
-      tmp_originProjection.z = originProjection.z;
+      // Project the cluster on to the basis vectors
+      Point    closestCluster = clusterCloud->points[0];
+      Cluster<Point> originCluster(0.0, 0.0, 0.0);
+      Point    originProjection = originCluster.get_plane_projection(filt.get_plane_coefficients());
+
+      Point closestClusterVec;
+
+      subtractXYZ(closestCluster, originProjection, closestClusterVec);
+
+      Point origin; origin.x = 0.0, origin.y = 0.0, origin.z = 0.0;
+//    Point    yRegPlane, xRegPlane;
+//    addXYZ(yRegVector, originProjection, yRegPlane);
+//    addXYZ(xRegVector, originProjection, xRegPlane);
+
+      float    x_amt = PCLUtils::dot_double_normalize(closestClusterVec, xRegVector);
+      float    y_amt = PCLUtils::dot_double_normalize(closestClusterVec, yRegVector);
+
+      viewer->removeShape("NavOriginLine");
+      viewer->addLine(origin, originProjection, "NavOriginLine", vp_navigation_clouds);
+      viewer->addLine(originProjection, closestCluster, 232, 232, 16, "NavOriginLine", vp_navigation_clouds);
 
 
-      pcl::PointXYZ source_to_target;
-      source_to_target.x = clusters_tgt->points[0].x - clusters_src->points[0].x;
-      source_to_target.y = clusters_tgt->points[0].y - clusters_src->points[0].y;
-      source_to_target.z = clusters_tgt->points[0].z - clusters_src->points[0].z;
-      
-      // The same vector, but starting from the projection of the origin.
-      pcl::PointXYZ source_to_target_op;
-      source_to_target_op.x = tmp_originProjection.x + source_to_target.x;
-      source_to_target_op.y = tmp_originProjection.y + source_to_target.y;
-      source_to_target_op.z = tmp_originProjection.z + source_to_target.z;
-      viewer->addLine(tmp_originProjection, source_to_target_op, 255, 0, 0, "vec", vp_botleft);
+      viewer->removeShape("ClosestClusterLine");
+      viewer->addLine(originProjection, closestCluster, 232, 16, 221, "ClosestClusterLine", vp_navigation_clouds);
+
+      cout << "Normalized X: " << x_amt << endl;
+      cout << "Normalized Y: " << y_amt << endl;
+
+      RobotPosition newPosGuess = robot.currentPos();
+      newPosGuess.x = newPosGuess.x + (-1.0 * x_amt * xRegDelta);
+      newPosGuess.y = newPosGuess.y + (-1.0 * y_amt * yRegDelta);
 
 
+      cout << "Moving to guess. Remember to check validity..." << endl;
+      robot.moveTo(newPosGuess);
+
+      cout << "New Position Guess: " << endl;
+      cout << newPosGuess << endl;
    }
 
 };

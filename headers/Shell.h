@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <pcl/visualization/pcl_visualizer.h> // Visualizing
+#include <inst/pcl_visualizer.h> // Visualizing
 
 // Convenience macro.
 #define SHELL_ADD_FUNCTION(SHELL, FUNCTION, NAME, DESC) \

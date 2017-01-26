@@ -20,7 +20,7 @@ extern "C" {
 #include "readline/history.h"
 }
 
-#include "Robot.h"
+#include "RobotExt.h"
 
 using namespace std;
 
@@ -34,8 +34,8 @@ namespace Direction {
 
 typedef list<string>             arg_list;
 
-// Void function that takes in an arg_list and Robot object
-typedef void                     handler (arg_list& args, Robot& robot );
+// Void function that takes in an arg_list and RobotExt object
+typedef void                     handler (arg_list& args, RobotExt& robot );
 typedef struct {
    string                     name; // Function Name, to users
    handler  *                 func; // Handler Function Pointer
@@ -77,7 +77,7 @@ handler        hl_home_smart;
 // Test new shit
 handler        hl_aaron_test;
 
-float convert_relative(Direction::Dir d, float f, Robot & robot);
+float convert_relative(Direction::Dir d, float f, RobotExt & robot);
 
 /*
    Function       : split 
@@ -101,10 +101,10 @@ arg_list split (const string& s)
    Description    : Outputs a 'help' message.
    Arguments      : 
       - arg_list  : a list of arguments to the function that will be ignored.
-      - robot     : a reference to the Gantry Robot that will be ignored.
+      - robot     : a reference to the Gantry RobotExt that will be ignored.
    Returns        : void
 */
-void hl_help(arg_list & args, Robot & robot)
+void hl_help(arg_list & args, RobotExt & robot)
 {
    cout << "This is a help function!" << endl;
 }
@@ -114,10 +114,10 @@ void hl_help(arg_list & args, Robot & robot)
    Description    : Quits the shell.
    Arguments      : 
       - arg_list  : a list of arguments to the function that will be ignored.
-      - robot     : a reference to the Gantry Robot that will be ignored.
+      - robot     : a reference to the Gantry RobotExt that will be ignored.
    Returns        : void
 */
-void hl_quit(arg_list & args, Robot & robot)
+void hl_quit(arg_list & args, RobotExt & robot)
 {
    cout << "You are a quitter!" << endl;
    quit = true;
@@ -128,10 +128,10 @@ void hl_quit(arg_list & args, Robot & robot)
    Description    : Homes the robot using HOMEZC instead of 'HOME' or 'RUN HOME5'
    Arguments      : 
       - arg_list  : A list of arguments to the function that will be ignored.
-      - robot     : a reference to the Gantry Robot that will be ignored.
+      - robot     : a reference to the Gantry RobotExt that will be ignored.
    Returns        : void
 */
-void hl_home_smart(arg_list & args, Robot & robot)
+void hl_home_smart(arg_list & args, RobotExt & robot)
 {
    // Run through all six axes. Print an error message if the robot cannot home
    // on a particular axis.
@@ -140,38 +140,39 @@ void hl_home_smart(arg_list & args, Robot & robot)
    size_t            error_msg_location;
    const string      error_msg("040-ARM POWER");
 
-   for (int axis = 1; axis <= 6; axis++)
-   {
-      homezc_cmd.str("HOMEZC ");
-      homezc_cmd.seekp(0, ios::end);
-      // Generate the "HOMEZC [AXIS]" command
-      homezc_cmd << axis;
+// for (int axis = 1; axis <= 6; axis++)
+// {
+//    homezc_cmd.str("HOMEZC ");
+//    homezc_cmd.seekp(0, ios::end);
+//    // Generate the "HOMEZC [AXIS]" command
+//    homezc_cmd << axis;
 
-      // Run the command. Poll the controller buffer for an error 
-      // message; this will be present if arm power quits.
-      
-      // Block until the home message at least completes.
-      robot.controller << homezc_cmd.str() << RobotManipulators::block;
+//    // Run the command. Poll the controller buffer for an error 
+//    // message; this will be present if arm power quits.
+//    
+//    // Block until the home message at least completes.
+//    robot.controller << homezc_cmd.str() << RobotManipulators::block;
 
-      // Read the controller's reply from the homezc command.
-      robot.controller >> homezc_reply;
-      
-      // If the reply from the controller contains an 'ARM POWER' error
-      // message, it means the axis we tried to home did not home 
-      // successfully.
-      error_msg_location = homezc_reply.find(error_msg);
-      if (error_msg_location != string::npos) {
-         cout << "Lost arm power while homing axis " << axis << "." <<
-                 " Arm was NOT succesffuly homed." << endl;
-         return;
-      } else {
-         cout << "Axis " << axis << " successfully homed." << endl;
-      }
+//    // Read the controller's reply from the homezc command.
+//    robot.controller >> homezc_reply;
+//    
+//    // If the reply from the controller contains an 'ARM POWER' error
+//    // message, it means the axis we tried to home did not home 
+//    // successfully.
+//    error_msg_location = homezc_reply.find(error_msg);
+//    if (error_msg_location != string::npos) {
+//       cout << "Lost arm power while homing axis " << axis << "." <<
+//               " Arm was NOT succesffuly homed." << endl;
+//       return;
+//    } else {
+//       cout << "Axis " << axis << " successfully homed." << endl;
+//    }
 
-      // Set 'homed' to true.
-      homed = true;
+//    // Set 'homed' to true.
+//    homed = true;
 
-   }
+// }
+   robot.home(false);
 }
 
 /*
@@ -181,10 +182,10 @@ void hl_home_smart(arg_list & args, Robot & robot)
    Arguments      : 
       - arg_list  : A list of arguments in the format: X Y Z
                     where 'X', 'Y', and 'Z' are floating-point numbers.
-      - robot     : a reference to the Gantry Robot 
+      - robot     : a reference to the Gantry RobotExt 
    Returns        : void
 */
-void hl_move_xyz(arg_list & args, Robot & robot)
+void hl_move_xyz(arg_list & args, RobotExt & robot)
 {
    cout << "hl_move_xyz: Num args = " << args.size() << endl;
 
@@ -222,7 +223,7 @@ void hl_move_xyz(arg_list & args, Robot & robot)
    } 
 }
 
-void hl_move_to_position_float(arg_list & args, Robot & robot)
+void hl_move_to_position_float(arg_list & args, RobotExt & robot)
 {
    RobotPosition new_pos = robot.currentPos();
 
@@ -261,7 +262,7 @@ void hl_move_to_position_float(arg_list & args, Robot & robot)
 
 }
 
-void hl_move_to_position_rel(arg_list & args, Robot & robot)
+void hl_move_to_position_rel(arg_list & args, RobotExt & robot)
 {
    RobotPosition new_pos = robot.currentPos();
 
@@ -300,10 +301,10 @@ void hl_move_to_position_rel(arg_list & args, Robot & robot)
    Arguments      : 
       - d         : A 'Direction' enum telling the function what axis it's dealing with.
       - f         : A number, between 0.0 and 1.0. 0.0 corresponds to the 
-      - robot     : a reference to the Gantry Robot.
+      - robot     : a reference to the Gantry RobotExt.
    Returns        : A float: see Description
 */
-float convert_relative(Direction::Dir d, float f, Robot & robot)
+float convert_relative(Direction::Dir d, float f, RobotExt & robot)
 {
    RobotPosition min = robot.currentLimits().min();
    RobotPosition max = robot.currentLimits().max();
@@ -327,33 +328,33 @@ float convert_relative(Direction::Dir d, float f, Robot & robot)
 
 /*
    Function       : hl_get_pos ('Position' Command Handler)
-   Description    : Write the position of the Gantry Robot to standard output.
+   Description    : Write the position of the Gantry RobotExt to standard output.
    Arguments      : 
       - arg_list  : a list of arguments to the function that will be ignored.
-      - robot     : a reference to the Gantry Robot.
+      - robot     : a reference to the Gantry RobotExt.
    Returns        : void
 */
-void hl_get_pos(arg_list & args, Robot & robot)
+void hl_get_pos(arg_list & args, RobotExt & robot)
 {
-   cout << "Robot Position: " << robot.currentPos() << endl;
+   cout << "RobotExt Position: " << robot.currentPos() << endl;
 }
 
 /*
    Function       : hl_get_limits
-   Description    : Display the limits of the Gantry Robot
+   Description    : Display the limits of the Gantry RobotExt
    Arguments      : 
       - arg_list  : a list of arguments to the function that will be ignored.
-      - robot     : a reference to the Gantry Robot.
+      - robot     : a reference to the Gantry RobotExt.
    Returns        : void
 */
-void hl_get_limits(arg_list & args, Robot & robot)
+void hl_get_limits(arg_list & args, RobotExt & robot)
 {
    cout << robot.currentLimits() << endl;
 }
 
 
 
-void hl_aaron_test(arg_list & args, Robot & robot)
+void hl_aaron_test(arg_list & args, RobotExt & robot)
 {
    RobotPosition current_pos = robot.currentPos();
    RobotPosition entered_pos;
@@ -395,7 +396,7 @@ void hl_aaron_test(arg_list & args, Robot & robot)
 
 }
 
-void hl_pos_smart(arg_list & args, Robot & robot);
+void hl_pos_smart(arg_list & args, RobotExt & robot);
 
 /*
    Function       : construct_commands()
@@ -433,10 +434,10 @@ void construct_commands()
    Description    : Execute the correct command based on the string input from 'readline'
    Arguments      : 
       - command   : String containing text input from terminal
-      - robot     : The Gantry Robot object
+      - robot     : The Gantry RobotExt object
    Returns        : A reference to the string that was passed in, after trimming
 */
-void execute_command(const string& command, Robot & robot)
+void execute_command(const string& command, RobotExt & robot)
 {
    // Split the command into a list of arguments and a command name
    arg_list    args        = split(command);
@@ -501,9 +502,9 @@ int main(int argc, char * argv[])
    construct_commands();
 
    // Initialize the robot
-// Robot robot("/dev/gantry");
-   Robot robot("/dev/cu.usbserial");
-   robot.home(); 
+// RobotExt robot("/dev/gantry");
+   RobotExt robot("/dev/cu.usbserial");
+// robot.home(false); 
    while (!quit) {
       char * input = readline(Prompt.c_str());
       if (input) {
@@ -526,7 +527,7 @@ int main(int argc, char * argv[])
 }
 
 
-void hl_pos_smart(arg_list & args, Robot & robot)
+void hl_pos_smart(arg_list & args, RobotExt & robot)
 {
    // get current position.
    const    RobotPosition current = robot.currentPos();

@@ -38,7 +38,7 @@ namespace colours {
    const colour_rgb_t colours[] = {
       colour_rgb_t(255, 0, 0), // red
       colour_rgb_t(0, 255, 0), // green
-      colour_rgb_t(0, 0, 255), // blue
+      colour_rgb_t(0, 191, 255), // blue
       colour_rgb_t(153, 0, 255) // purple
    };
 
