@@ -15,6 +15,7 @@
 # set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH} $ENV{FOURXX}/cmake/")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/cmake/")
+MESSAGE(STATUS "CMAKE_MODULE_PATH : " ${CMAKE_MODULE_PATH})
 
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
