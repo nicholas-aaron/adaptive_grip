@@ -1,4 +1,5 @@
 #include "Shell.h"
+#include "Mutex.h"
 #include "TwoPlaneFilter.h"
 #include "CameraFile.h"
 #include "common_defs.h"

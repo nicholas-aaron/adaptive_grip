@@ -42,9 +42,9 @@ int                                                      capture_from_camera(arg
 int                                                      adjust_plane(arg_list input);
 int                                                      remove_plane(arg_list input);
 int                                                      euclidean_extraction(arg_list input);
-void cluster_lines(pcl::PointCloud<point_t>::Ptr   cloud,
-                   std::vector<pcl::PointIndices>  &clusters,
-                   pcl::ModelCoefficients::Ptr     floor_coefficients);
+void                                                     cluster_lines(pcl::PointCloud<point_t>::Ptr   cloud,
+                                                            std::vector<pcl::PointIndices>  &clusters,
+                                                            pcl::ModelCoefficients::Ptr     floor_coefficients);
 
 // Program variables and objects
 pcl::PointCloud<point_t>::Ptr                            m_cloud;                   
@@ -595,18 +595,11 @@ void cluster_lines(pcl::PointCloud<point_t>::Ptr   cloud,
    viewer->removePointCloud("belowPlane");
    viewer->updatePointCloud(centroid_cloud, "centroids");
 
-// for (pcl::PointCloud<point_t>::iterator it = centroid_cloud->begin();
-//       it != centroid_cloud->end();
-//       ++it)
-// {
-//    point_t projection_point;
-//    centroid_proj->points.push_back(
-// }
-
    pcl::ProjectInliers<point_t> proj;
    proj.setModelType(pcl::SACMODEL_PLANE);
    proj.setInputCloud(centroid_cloud);
    proj.setModelCoefficients(floor_coefficients);
+
    proj.filter(*centroid_proj);
 
    viewer->addPointCloud<point_t>(centroid_proj, "centroid projections");
