@@ -24,8 +24,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        RobotGUI.cpp
+    RobotLimits.cpp \
+    RobotPosition.cpp \
+    RobotGUI.cpp \
+    TargetItem.cpp \
+    ItemsImage.cpp
 
-HEADERS  += RobotGUI.h
 
-FORMS    += RobotGUI.ui
+HEADERS  += \
+    RobotLimits.h \
+    RobotPosition.h \
+    RobotGUI.h \
+    TargetItem.h \
+    ItemsImage.h
+
+FORMS    +=
+
+DISTFILES +=
