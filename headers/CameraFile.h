@@ -30,10 +30,7 @@ template <typename PointT> class CameraFile: public CameraBase<PointT> {
    // Constructor.
    // Takes in a Mutex along with a point cloud, to make sure the cloud isn't 
    // being modified or accessed elsewhere while it's being overwritten.
-   CameraFile(CloudPtr cloud, Mutex * mutex) :
-      CameraBase<PointT>(cloud),
-      _cloud_mutex(mutex)
-   {}
+   CameraFile(CloudPtr cloud, Mutex * mutex);
 
    /*
       Function       : retrieve()
@@ -41,35 +38,15 @@ template <typename PointT> class CameraFile: public CameraBase<PointT> {
       Returns        : Returns SUCCCESS if read from file was successful,
                        FAILURE otherwise.
    */
-   int retrieve()
-   {
-      _cloud_mutex->lock();
+   int retrieve();
 
-      // TODO get this filename from the preprocessor!
-      const std::string filename = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/data/saved_kinect_pcd.pcd";
-
-      if (pcl::io::loadPCDFile<PointT>(filename, *(this->m_cloud)) == -1) {
-         std::cerr << "Could not open: <" << filename << ">!" << std::endl;
-         _cloud_mutex->unlock();
-         return FAILURE;
-      }
-
-      for (typename pcl::PointCloud<PointT>::iterator it = this->m_cloud->begin();
-           it != this->m_cloud->end(); 
-           ++it)
-      {
-         (*it).r = 255;
-         (*it).g = 255;
-         (*it).b = 255;
-      }
-
-      _cloud_mutex->unlock();
-      return SUCCESS;
-   }
+   void setFilename(std::string);
+   
 
    private:
 
    // Pointer to cloud mutex
    Mutex * _cloud_mutex;
+   std::string filename;
 };
 #endif

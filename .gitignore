@@ -13,6 +13,9 @@ log/*
 *build*/
 *debug*/
 
+#Stuff in the libraries folder, this is where libraries will be buily
+libraries/*
+
 ## The following prevents any conventionally named object file from
 # 	being committed
 *.slo
