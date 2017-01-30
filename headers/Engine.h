@@ -12,7 +12,16 @@
 #include "Logger.h"
 #include "CameraFile.h"
 #include "ClusterFinder.h"
+
 #include "TwoPlaneFilter.h"
+
+#include "colours.h"
+
+#include "PCLUtils.h"
+
+#include "Cluster.h"
+
+#include <pcl/filters/project_inliers.h>
 
 class Engine {
 
@@ -29,6 +38,22 @@ public:
 
    typedef pcl::PointXYZRGBA Point;
    typedef pcl::PointCloud<Point> PointCloud;
+
+   struct Line {
+      Point    p1;
+      Point    p2;
+
+      Line(Point _p1, Point _p2) :
+         p1(_p1), p2(_p2) {}
+
+      Line( const Line &copy) :
+         p1(copy.p1), p2(copy.p2) {}
+      
+   };
+
+   typedef struct Line LineT;
+
+   Point claw_point;
 
 private:
 
@@ -47,16 +72,19 @@ public:
    ClusterFinder<Point>    m_cluster_finder;
 
    // Logging
-   Logger                  m_logger;
+   Logger *                m_logger;
    
    // "State" Enumeration
    EEngineState            m_state;
 
    // Base Constructor
-   Engine(PointCloud::Ptr, Mutex *);
+   Engine(PointCloud::Ptr, Mutex *, Logger *);
 
    // Visualization
-   PointCloud::Ptr         m_vis_cloud;
+   PointCloud::Ptr         m_vis_cloud; // The original cloud
+
+   // Visualize located centroids of objects in the workspace
+   PointCloud::Ptr         m_vis_centroids; 
 
    // Coefficients representing the floor's equation in 3-D space
    Eigen::Vector4f         m_floor_plane;
@@ -68,6 +96,14 @@ public:
     * - Larger points showing centroids of object surfaces
     *
     */
+
+   std::vector<LineT>            m_lines; // TODO integrate
+
+   Cluster<Point>                m_claw_cluster;
+
+   std::vector<Cluster<Point> >  m_clusters; // TODO integrate
+
+
 
    /*
       Function       : get_image()
@@ -101,6 +137,8 @@ public:
    */
    void  get_movement();
 
+
+   void  colour_floor(int);
 
 };
 

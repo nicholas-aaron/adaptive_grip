@@ -11,5 +11,6 @@ Logger::log(std::string str)
 
 void 
 Logger::log(std::stringstream &ss){
+// log(ss.str());
    std::cout << ss.str() << std::endl;
 }

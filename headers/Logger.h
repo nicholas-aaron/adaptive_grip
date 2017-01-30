@@ -22,10 +22,10 @@ public:
    Logger();
 
    // Base "log" method: print to standard output
-   void log(std::string str);
+   virtual void log(std::string str);
 
    // Same as above but with a stringstream
-   void log(std::stringstream &ss);
+   virtual void log(std::stringstream &ss);
 
 };
 

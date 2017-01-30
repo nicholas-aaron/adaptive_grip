@@ -141,9 +141,9 @@ public:
         pcl::Grabber* interface = new pcl::OpenNIGrabber();
 
         // Had to change the function template from PointXYZRGBA to PointXYZRGBA
-        boost::function<void (const cloud_t::ConstPtr&)> f =
+        boost::function<void (const cloud_t::ConstPtr&)> callback_function =
                 boost::bind (&SimpleOpenNIViewer::cloud_cb_, this, _1);
-        interface->registerCallback (f);
+        interface->registerCallback (callback_function);
 
         // NEW: Also create a boost function template for our m_save_cloud callback
         // boost::bind is confusing here.
