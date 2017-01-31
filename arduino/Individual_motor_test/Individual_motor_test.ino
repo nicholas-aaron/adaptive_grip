@@ -14,7 +14,7 @@
 
 
 //Declare variables for functions
-char userInput;
+//char userInput;
 int desiredDegrees;
 int x;
 int y;
@@ -23,6 +23,7 @@ int count1;
 int count2;
 int count3;
 int count4;
+boolean changeD;
 
 void setup() {
   // put your setup code here, to run once:
@@ -48,6 +49,7 @@ void setup() {
   count2 = 0;
   count3 = 0;
   count4 = 0;
+  changeD = false;
 }
 
 //Main loop
@@ -88,23 +90,31 @@ void loop() {
       driveMotor(360,1,HIGH);
       //resetEDPins();
       */
-      digitalWrite(EN_1, LOW);
+      //digitalWrite(EN_1, LOW);
       digitalWrite(EN_2, LOW);
-      digitalWrite(EN_3, LOW);
-      digitalWrite(EN_4, LOW);
-      digitalWrite(EN_5, LOW);
-      digitalWrite(EN_6, LOW);
+      //digitalWrite(EN_3, LOW);
+      //digitalWrite(EN_4, LOW);
+      //digitalWrite(EN_5, LOW);
+      //digitalWrite(EN_6, LOW);
       for(x= 0; x<1000; x++)  //Loop the forward stepping enough times for motion to be visible
-      {
+      {/*
+        if(changeD){
+          changeD = false;
+          digitalWrite(dir, LOW);
+        }
+        else{
+          changeD = true;
+          digitalWrite(dir, HIGH);
+        }*/
         digitalWrite(stp,HIGH); //Trigger one step forward
-        delay(1);
+        delay(2);
         digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
-        delay(1);
+        delay(2);
       }
       resetEDPins();
 
       //holdPosition();
-      delay(5000);
+      //delay(5000);
       //resetEDPins();  
 }
 
