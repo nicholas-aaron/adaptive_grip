@@ -6,6 +6,7 @@
 #define DIR_4 6
 #define DIR_5 7
 #define DIR_6 8
+#define ARRAY_SIZE 6
 
 //Declare variables for functions
 char userInput;
@@ -23,24 +24,27 @@ void setup() { //--------------------------------------------------- SETUP -----
   Serial.begin(9600); //Open Serial connection for debugging
   //Print function list for user selection
   Serial.println("Test Begins");
-  Serial.println();
 }
 
 void loop() { // ------------------------------------------------------- MAIN LOOP --------------------------------------------------//
   int degrees = 180;
-  int motors[6];
-  boolean directions[6];
+  int motors[ARRAY_SIZE] = {1,2,3,4,5,6};
+  boolean directions[ARRAY_SIZE] = {false,false,false,false,false,false};
+  printArrays(motors, directions, ARRAY_SIZE);
 
-  motors[2] = DIR_3;
-  zeroIntArray( motors, 6 );
-  falseBooleanArray(directions, 6));
+  zeroIntArray( motors, ARRAY_SIZE );
+  falseBooleanArray( directions, ARRAY_SIZE);
+  printArrays(motors, directions,ARRAY_SIZE);
+
   motors[0] = DIR_1;
   motors[1] = DIR_2;
   directions[0] = true;
   directions[1] = true;
+  printArrays(motors, directions, ARRAY_SIZE);
   //dirs[2] false;
-  driveMotor(motorsPtr, 180, directionsPtr);
-  holdPosition(1000);
+  driveMotor(motors, 180, directions, ARRAY_SIZE);
+  holdPosition(10000);
+
 }
 
 
