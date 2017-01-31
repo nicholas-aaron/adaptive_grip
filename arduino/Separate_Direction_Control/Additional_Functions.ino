@@ -24,3 +24,10 @@ void falseBooleanArray(boolean directions[], int arrayLength)
     directions[x] = false;
   }
 }
+
+void printPositions(int (*positions)){
+  for (int x = 0; x < 6; x++){
+    Serial.print("position[" + String(x) + "] :" + String(positions[x]) + "   |   ");
+  }
+  Serial.println("");
+}

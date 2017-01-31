@@ -19,6 +19,7 @@ void setup() { //--------------------------------------------------- SETUP -----
   pinMode(DIR_4,OUTPUT);
   pinMode(DIR_5,OUTPUT);
   pinMode(DIR_6,OUTPUT);
+  
 
   setPins();
   Serial.begin(9600); //Open Serial connection for debugging
@@ -30,7 +31,12 @@ void loop() { // ------------------------------------------------------- MAIN LO
   int degrees = 180;
   int motors[ARRAY_SIZE] = {1,2,3,4,5,6};
   boolean directions[ARRAY_SIZE] = {false,false,false,true,true,true};
-  testAllMotors(motors, directions);//This takes about 30 seconds
+  int positions[ARRAY_SIZE] = {0,0,0,0,0,0};
+  setOriginalPosition(positions );
+  printPositions(positions);
+  testAllMotors(motors, directions, positions);//This takes about 30 seconds
+  printPositions(positions);
+
   holdPosition(10000);
 
 }
