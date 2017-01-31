@@ -1,4 +1,4 @@
-// ----------------------------------------------------------Drive Motors -----------------------------------------------------------------------//
+// -----------------------------Drive Motors -------------------------//
 
 void driveMotor(int (*motors), int degRotation, boolean directions[], int arrayLength )
 {
@@ -55,23 +55,9 @@ void setPins()
 
 }
 
-// -----------------------------------------------------------Reset Array ----------------------------------------------------------------//
-void zeroIntArray(int (*motors), int arrayLength)
-{
-  for (int x = 0; x < arrayLength; x ++){
-    motors[x] = 0;
-  } 
-}
 
-//------------------------------------------------------------Reset Boolean Array --------------------------------------------------//
-void falseBooleanArray(boolean directions[], int arrayLength)
-{
-  for (int x = 0; x < arrayLength; x++){
-    directions[x] = false;
-  }
-}
 
-// ------------------------------------------------------------------- Hold Position -------------------------------------------------------------//
+// ---------------------------- Hold Position -----------------------//
 
 void holdPosition(int mSecs)
 {
@@ -99,7 +85,33 @@ void holdPosition(int mSecs)
   }
 }
 
-// ----------------------------------------------------------------- Drive Multiple Motors -----------------------------------------------------------//
+
+//-------------------------Test Motors ------------------------------//
+void testAllMotors(int (*motors), boolean directions[]){
+
+  int idx[6] = {0,0,0,0,0,0};
+
+  for (idx[0] = 0; idx[0] <2; idx[0]++){
+    for (idx[1] = 0; idx[1] <2; idx[1]++){
+      for (idx[2] = 0; idx[2] <2; idx[2]++){
+        for (idx[3] = 0; idx[3] <2; idx[3]++){
+          for (idx[4] = 0; idx[4] <2; idx[4]++){
+            for (idx[5] = 0; idx[5] <2; idx[5]++){
+              zeroIntArray(motors,6);
+              falseBooleanArray(directions,6);
+              setMotors(idx, motors);
+              driveMotor(motors,45,directions,6);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+// ------------------------ Drive Multiple Motors ----------------------//
+
 void multiMotorDrive(int mtr1, boolean dir1, int mtr2, boolean dir2, int rot) {
   double degPerStp = (double)(1.8 / 8); // This is used for 1/8th stepping mode
   int numSteps = (int)(rot / degPerStp);
@@ -143,15 +155,15 @@ void multiMotorDrive(int mtr1, boolean dir1, int mtr2, boolean dir2, int rot) {
   }
 }
 
-void printArrays(int(*motors), boolean directions[], int arrayLength){
-  for (int x = 0; x < arrayLength; x++){
-    Serial.print("motors[" + String(x) + "] = " + String(motors[x]) + " | ");
+// -----------------------------------Set Motors Array ------------------------//
+
+void setMotors(int (*index), int (*motors)){
+  for (int x = 0; x < 6; x++){
+    if (index[x]==1)
+      motors[x] = x+3;//DIR_1 is three, DIR_5 is 7;
+    else
+      motors[x] = 0;
   }
-  Serial.println();
-  for (int x = 0; x < arrayLength; x++){
-    Serial.print("directions[" + String(x) + "] = " + String(directions[x]) + " | ");
-  }
-  Serial.println();
 }
 
 

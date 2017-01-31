@@ -29,20 +29,8 @@ void setup() { //--------------------------------------------------- SETUP -----
 void loop() { // ------------------------------------------------------- MAIN LOOP --------------------------------------------------//
   int degrees = 180;
   int motors[ARRAY_SIZE] = {1,2,3,4,5,6};
-  boolean directions[ARRAY_SIZE] = {false,false,false,false,false,false};
-  printArrays(motors, directions, ARRAY_SIZE);
-
-  zeroIntArray( motors, ARRAY_SIZE );
-  falseBooleanArray( directions, ARRAY_SIZE);
-  printArrays(motors, directions,ARRAY_SIZE);
-
-  motors[0] = DIR_1;
-  motors[1] = DIR_2;
-  directions[0] = true;
-  directions[1] = true;
-  printArrays(motors, directions, ARRAY_SIZE);
-  //dirs[2] false;
-  driveMotor(motors, 180, directions, ARRAY_SIZE);
+  boolean directions[ARRAY_SIZE] = {false,false,false,true,true,true};
+  testAllMotors(motors, directions);//This takes about 30 seconds
   holdPosition(10000);
 
 }
