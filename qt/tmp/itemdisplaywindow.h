@@ -21,25 +21,25 @@ public:
     std::vector<WSObject> *   m_objects;
 
     int                       get_index();
+    void                      update_robot_position(const RobotPosition & pos);
 
 protected:
 
     void     paintEvent(QPaintEvent *);
+    void     resizeEvent(QResizeEvent *);
+
 
 private:
 
-    RobotLimits               m_limits;
-
-
     float                     x_scale_factor;
     float                     y_scale_factor;
-
     int                       select_index;
-
-
-    int win_width, win_height;
-    
+    int                       win_width;
+    int                       win_height;
     RobotLimits               limits;
+    RobotPosition             robot_position;
+
+    void convert_to_xy        (const RobotPosition & rp, float & x, float & y);
 
 signals:
 
