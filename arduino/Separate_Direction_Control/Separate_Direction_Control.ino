@@ -1,3 +1,4 @@
+
 #define STP 2 // All motor steps are tied together
 #define DIR_1 3 // Each motor has its own direction pin
 #define DIR_2 4
@@ -9,7 +10,7 @@
 //Declare variables for functions
 char userInput;
 
-void setup() {
+void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);
   pinMode(DIR_1,OUTPUT);
   pinMode(DIR_2,OUTPUT);
@@ -25,15 +26,21 @@ void setup() {
   Serial.println();
 }
 
-//Main loop
-void loop() {
+void loop() { // ------------------------------------------------------- MAIN LOOP --------------------------------------------------//
   int degrees = 180;
-  boolean rotationDirection = false;
-  
-  for(int motorNum = DIR_1; motorNum <= DIR_6; motorNum++){
-    driveMotor(motorNum, degrees,rotationDirection); 
-  }
-  holdPosition(5000);
+  int motors[6];
+  boolean directions[6];
+
+  motors[2] = DIR_3;
+  zeroIntArray( motors, 6 );
+  falseBooleanArray(directions, 6));
+  motors[0] = DIR_1;
+  motors[1] = DIR_2;
+  directions[0] = true;
+  directions[1] = true;
+  //dirs[2] false;
+  driveMotor(motorsPtr, 180, directionsPtr);
+  holdPosition(1000);
 }
 
 
