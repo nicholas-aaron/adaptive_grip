@@ -1,0 +1,29 @@
+#include "WSObject.h"
+
+WSObject::WSObject(float x, float y, float obs_dist) :
+   x_position(x), y_position(y), observation_distance(obs_dist)
+{
+   id = current_id++;
+
+   r_display = 0;
+   g_display = 0;
+   b_display = 0;
+}
+
+// Copy constructor
+WSObject::WSObject(const WSObject & copy) {
+
+   x_position = copy.x_position;
+   y_position = copy.y_position;
+   observation_distance = copy.observation_distance;
+   id         = copy.id;
+
+   r_display = copy.r_display;
+   g_display = copy.g_display;
+   b_display = copy.b_display;
+}
+
+// Static initiations
+int WSObject::current_id = 0;
+float WSObject::fudge = 60.0; // TODO FIND A WAY TO LOWER THIS
+float WSObject::distance_fudge = 9999;
