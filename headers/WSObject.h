@@ -1,7 +1,7 @@
 #ifndef WSOBJECT__H
 #define WSOBJECT__H
 
-#include <Eigen/Dense>
+// #include <Eigen/Dense>
 
 class WSObject {
 
@@ -12,12 +12,12 @@ class WSObject {
 
    float          observation_distance;
 
-#ifdef AIDAN
    float          x_obs_position;
    float          y_obs_position;
    float          r_display, g_display, b_display;
-#endif
 
+   float          x_img_position;
+   float          y_img_position;
 
    int            id;
 // float          distance_to(WSObject & o, Eigen::Vector4f & plane);
@@ -31,6 +31,8 @@ class WSObject {
 
    // Copy constructor
    WSObject(const WSObject & copy); 
+
+   bool operator== (const WSObject& ws) const;
 
 };
 

@@ -1,4 +1,4 @@
-#include "WSObject.h"
+#include "../headers/WSObject.h"
 
 WSObject::WSObject(float x, float y, float obs_dist) :
    x_position(x), y_position(y), observation_distance(obs_dist)
@@ -21,6 +21,15 @@ WSObject::WSObject(const WSObject & copy) {
    r_display = copy.r_display;
    g_display = copy.g_display;
    b_display = copy.b_display;
+}
+
+bool WSObject::operator== (const WSObject& ws) const {
+    return id == ws.id &&
+           x_position == ws.x_position &&
+           y_position == ws.y_position &&
+           x_obs_position == ws.x_obs_position &&
+           y_obs_position == ws.y_obs_position &&
+           observation_distance == ws.observation_distance;
 }
 
 // Static initiations

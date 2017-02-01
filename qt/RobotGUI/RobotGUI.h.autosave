@@ -1,5 +1,5 @@
-#ifndef ROBOTGUIV2_H
-#define ROBOTGUIV2_H
+#ifndef ROBOTGUI_H
+#define ROBOTGUI_H
 
 #include "../../headers/WSObject.h"
 
@@ -8,12 +8,12 @@
 #include <QGraphicsView>
 #include <QList>
 
-class RobotGUIVTwo : public QGraphicsView
+class RobotGUI : public QGraphicsView
 {
     Q_OBJECT
 
 public:
-    RobotGUIVTwo();
+    RobotGUIV();
 
 private:
     QGraphicsScene *        myScene;
@@ -30,4 +30,4 @@ signals:
 
 };
 
-#endif // ROBOTGUIV2_H
+#endif // ROBOTGUI_H
