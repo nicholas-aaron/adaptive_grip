@@ -147,7 +147,7 @@ void setOriginalPosition(int enablePin, int (*positions)) {
   digitalWrite(enablePin,LOW); //Turns the motors back on - draws max current so don't remain in this state for a long time
 }
 
-void userMotorChoice(char userInput, int (*motors), boolean directions){
+void userMotorChoice(char userInput, int (*motors), boolean directions[]){
   switch(userInput){
     case '1':{
       motors[0] = DIR_1;
@@ -155,23 +155,23 @@ void userMotorChoice(char userInput, int (*motors), boolean directions){
       break;
     }case '2':{
       motors[1] = DIR_2;
-      directions[0] = true;
+      directions[1] = true;
       break;
     }case '3':{
       motors[2] = DIR_3;
-      directions[0] = true;
+      directions[2] = true;
       break;
     }case '4':{
       motors[3] = DIR_4;
-      directions[0] = true;
+      directions[3] = true;
       break;
     }case '5':{
       motors[4] = DIR_5;
-      directions[0] = true;
+      directions[4] = true;
       break;
     }case '6':{
       motors[5] = DIR_6;
-      directions[0] = true;
+      directions[5] = true;
       break;
     }case '7':{
       motors[0] = DIR_1;
@@ -179,23 +179,23 @@ void userMotorChoice(char userInput, int (*motors), boolean directions){
       break;
     }case '8':{
       motors[1] = DIR_2;
-      directions[0] = false;
+      directions[1] = false;
       break;
     }case 'a':{
       motors[2] = DIR_3;
-      directions[0] = false;
+      directions[2] = false;
       break;
     }case 'b':{
       motors[3] = DIR_4;
-      directions[0] = false;
+      directions[3] = false;
       break;
     }case 'c':{
       motors[4] = DIR_5;
-      directions[0] = false;
+      directions[4] = false;
       break;
     }case 'd':{
       motors[5] = DIR_6;
-      directions[0] = false;
+      directions[5] = false;
       break;
     }
     default:{

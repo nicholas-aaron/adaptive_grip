@@ -11,6 +11,7 @@
 
 //Declare variables for functions
 char userInput;
+boolean firstRun = true;
 
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);
@@ -44,13 +45,18 @@ void loop() { // ------------------------------------------------------- MAIN LO
   int motors[ARRAY_SIZE] = {1,2,3,4,5,6};
   boolean directions[ARRAY_SIZE] = {false,false,false,true,true,true};
   int positions[ARRAY_SIZE] = {0,0,0,0,0,0};
-  setOriginalPosition(EN, positions);
-  printPositions(positions);
+  if (firstRun){
+    setOriginalPosition(EN, positions);
+    firstRun = false;  
+  }
+  
+  //printPositions(positions);
   while (Serial.available()) {
     userInput = Serial.read();
+    Serial.println("Driving Motors");
     zeroIntArray(motors,ARRAY_SIZE);
-    userMotorChoice(userInput); // Sets new motors array and directions array
-    
+    userMotorChoice(userInput, motors, directions); // Sets new motors array and directions array
+    driveMotor(motors, 5, directions, positions, ARRAY_SIZE);
   }
 }
 
