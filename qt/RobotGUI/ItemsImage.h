@@ -4,16 +4,18 @@
 #include <QGraphicsObject>
 #include <QDebug>
 
-class ItemsImage : public QGraphicsObject
+class ItemsImage : public QGraphicsItem
 {
+    // Q_OBJECT
+
 public:
-    ItemsImage(int id);
+    ItemsImage(int id, int r, int g, int b);
 
     QRectF boundingRect() const Q_DECL_OVERRIDE;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) Q_DECL_OVERRIDE;
 
 public slots:
-    void mousePressEvent(QGraphicsSceneMouseEvent * event);
+    void mousePressEvent(QGraphicsSceneMouseEvent * event) Q_DECL_OVERRIDE;
 
 private:
     QColor      color;

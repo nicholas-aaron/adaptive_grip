@@ -1,27 +1,29 @@
-#ifndef ROBOTGUIV2_H
-#define ROBOTGUIV2_H
+#ifndef ROBOTGUI_H
+#define ROBOTGUI_H
 
 #include "../../headers/WSObject.h"
 
-#include <QObject>
-#include <QGraphicsObject>
-#include <QGraphicsView>
+#include <QWidget>
 #include <QList>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 
-class RobotGUIVTwo : public QGraphicsView
+class RobotGUI : public QWidget
 {
     Q_OBJECT
 
 public:
-    RobotGUIVTwo();
+    RobotGUI();
 
 private:
     QGraphicsScene *        myScene;
     QGraphicsView *         myView;
     QList<WSObject> *       currentList;
 
+    float                   x_scale;
+    float                   y_scale;
 
-public slots:
+private slots:
     void updateWSObjects(QList<WSObject> * newList);
     void redrawItems();
 
@@ -30,4 +32,4 @@ signals:
 
 };
 
-#endif // ROBOTGUIV2_H
+#endif // ROBOTGUI_H

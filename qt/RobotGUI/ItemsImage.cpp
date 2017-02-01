@@ -6,8 +6,8 @@
 
 #include <math.h>
 
-ItemsImage::ItemsImage(int id)
-    : color (qrand() % 256, qrand() % 256, qrand() % 256),
+ItemsImage::ItemsImage(int id, int r, int g, int b)
+    : color (r, g, b),
       id (id)
 {
 }
@@ -23,11 +23,11 @@ void ItemsImage::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWid
     painter->setPen(QColor(255, 0, 0, 127));
     painter->drawRect((boundingRect()));
     painter->drawEllipse(0, 0, 15, 15);
-    painter->drawText(0, 25, id);
+    painter->drawText(0, 25, (QString) id);
     painter->setBrush(Qt::NoBrush);
 }
 
 void ItemsImage::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug() << "I clicked on a graphics item";
+    qDebug() << "I clicked this item and text popped up";
 }

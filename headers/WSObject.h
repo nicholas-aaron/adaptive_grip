@@ -16,9 +16,6 @@ class WSObject {
    float          y_obs_position;
    float          r_display, g_display, b_display;
 
-   float          x_img_position;
-   float          y_img_position;
-
    int            id;
 // float          distance_to(WSObject & o, Eigen::Vector4f & plane);
 
