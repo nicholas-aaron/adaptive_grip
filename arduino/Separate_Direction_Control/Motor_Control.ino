@@ -134,13 +134,76 @@ void setMotors(int (*index), int (*motors)) {
 }
 
 //-------------------------- Set Original Position --------------------//
-void setOriginalPosition(int (*positions)) {
+
+void setOriginalPosition(int enablePin, int (*positions)) {
   char userInput;
   Serial.println("Please turn the motors to their initial positions, then enter some serial data");
+  digitalWrite(enablePin,HIGH);
   while (!Serial.available()) { //Allows the motors to not step - no holding torque
   }
   for (int x = 0; x < 6; x++) {
     positions[x] = 0; //resets the position
+  }
+  digitalWrite(enablePin,LOW); //Turns the motors back on - draws max current so don't remain in this state for a long time
+}
+
+void userMotorChoice(char userInput, int (*motors), boolean directions){
+  switch(userInput){
+    case '1':{
+      motors[0] = DIR_1;
+      directions[0] = true;
+      break;
+    }case '2':{
+      motors[1] = DIR_2;
+      directions[0] = true;
+      break;
+    }case '3':{
+      motors[2] = DIR_3;
+      directions[0] = true;
+      break;
+    }case '4':{
+      motors[3] = DIR_4;
+      directions[0] = true;
+      break;
+    }case '5':{
+      motors[4] = DIR_5;
+      directions[0] = true;
+      break;
+    }case '6':{
+      motors[5] = DIR_6;
+      directions[0] = true;
+      break;
+    }case '7':{
+      motors[0] = DIR_1;
+      directions[0] = false;
+      break;
+    }case '8':{
+      motors[1] = DIR_2;
+      directions[0] = false;
+      break;
+    }case 'a':{
+      motors[2] = DIR_3;
+      directions[0] = false;
+      break;
+    }case 'b':{
+      motors[3] = DIR_4;
+      directions[0] = false;
+      break;
+    }case 'c':{
+      motors[4] = DIR_5;
+      directions[0] = false;
+      break;
+    }case 'd':{
+      motors[5] = DIR_6;
+      directions[0] = false;
+      break;
+    }
+    default:{
+      //do something
+      Serial.println("ERROR, User input was incorrect");
+      directions[0] = false;
+      break;
+    }
   }
 }
 
