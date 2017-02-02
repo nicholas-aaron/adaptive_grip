@@ -1,5 +1,4 @@
 #include "RobotGUI.h"
-#include "ItemsImage.h"
 
 #include <QDebug>
 #include <math.h>
@@ -8,7 +7,7 @@
 #define SCENE_WIDTH 600
 #define SCENE_HEIGHT 360
 
-#define BUFFER_AMOUNT 25
+#define BUFFER_AMOUNT 135
 
 RobotGUI::RobotGUI() :
     currentList(NULL)
@@ -16,8 +15,6 @@ RobotGUI::RobotGUI() :
     // Initialize both the view and the scene
     QGraphicsScene * scene = new QGraphicsScene;
     QGraphicsView * view = new QGraphicsView;
-    QGraphicsRectItem * rect = new QGraphicsRectItem;
-
 
     // Set the scene, and the scene's size
     myScene = scene;
@@ -33,7 +30,7 @@ RobotGUI::RobotGUI() :
     // Set the view, and resize the view to the dimensions of its parent scene
     myView = view;
     myView->setScene(myScene);
-    myView->resize(myScene->width(), myScene->height());
+    myView->resize(myScene->width() + BUFFER_AMOUNT, myScene->height() + BUFFER_AMOUNT);
     myView->setWindowTitle("Gantry Robot GUI");
 
     myView->show();
@@ -51,7 +48,6 @@ void RobotGUI::updateWSObjects(QList<WSObject> * newList)
     // The list has been updated. Their sizes are different
     if (newList->size() != cList.size()) {
         currentList = newList;
-        emit wsobjectsUpdated(newList);
     }
 
     // If any of the WSObjects have changed, signal that the lists have updated
@@ -59,7 +55,6 @@ void RobotGUI::updateWSObjects(QList<WSObject> * newList)
         bool areEqual = (nList[i] == cList[i]);
         if (!areEqual) {
             currentList = newList;
-            emit wsobjectsUpdated(newList);
         }
     }
 }
@@ -72,6 +67,8 @@ void RobotGUI::updateWSObjects(QList<WSObject> * newList)
 void RobotGUI::redrawItems()
 {
     QList<WSObject> cList = *currentList;
+    QGraphicsRectItem * rect = new QGraphicsRectItem;
+
 
     myScene->clear();
 
@@ -80,6 +77,9 @@ void RobotGUI::redrawItems()
         item->setPos(cList[i].x_position / SCREEN_RATIO, cList[i].y_position / -SCREEN_RATIO);
         myScene->addItem(item);
     }
+
+    rect->setRect(0, 0, SCENE_WIDTH, SCENE_HEIGHT);
+    myScene->addItem(rect);
 }
 
 /**
@@ -87,7 +87,6 @@ void RobotGUI::redrawItems()
  * @param n
  * @return
  */
-
 QList<WSObject> RobotGUI::generateWSObject(int n)
 {
     QList<WSObject> list;
@@ -104,6 +103,8 @@ QList<WSObject> RobotGUI::generateWSObject(int n)
 
     return list;
 }
+
+
 
 
 

@@ -1,6 +1,8 @@
 #ifndef ROBOTGUI_H
 #define ROBOTGUI_H
 
+#include "RobotLimits.h"
+#include "ItemsImage.h"
 #include "../../headers/WSObject.h"
 
 #include <QWidget>
@@ -19,15 +21,15 @@ private:
     QGraphicsScene *        myScene;
     QGraphicsView *         myView;
     QList<WSObject> *       currentList;
+    RobotLimits             limits;
 
-    QList<WSObject> generateWSObject(int n);
+    float                   xScale;
+    float                   yScale;
 
-private slots:
     void updateWSObjects(QList<WSObject> * newList);
     void redrawItems();
 
-signals:
-    void wsobjectsUpdated(QList<WSObject> * newList);
+    QList<WSObject> generateWSObject(int n);
 
 };
 

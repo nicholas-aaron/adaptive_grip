@@ -16,14 +16,17 @@ ItemsImage::ItemsImage(WSObject wso)
 
 QRectF ItemsImage::boundingRect() const
 {
-    return QRectF(0, 0, 30, 30);
+    return QRectF(-15, -15, 30, 30);
 }
 
 void ItemsImage::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
+    painter->setPen(Qt::black);
     painter->setBrush(color);
-    painter->drawEllipse(0, 0, 20, 20);
+    painter->drawEllipse(-10, -10, 20, 20);
+    painter->drawText(-5, 20, QString::number(id));
     painter->setBrush(Qt::NoBrush);
+    painter->setPen(Qt::NoPen);
 }
 
 void ItemsImage::mousePressEvent(QGraphicsSceneMouseEvent *event)
