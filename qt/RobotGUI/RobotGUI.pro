@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     RobotPosition.cpp \
     RobotGUI.cpp \
     ItemsImage.cpp \
-    ../../src/WSObject.cpp
+    ../../src/WSObject.cpp \
+    ObservedLine.cpp
 
 
 HEADERS  += \
@@ -36,7 +37,8 @@ HEADERS  += \
     RobotPosition.h \
     RobotGUI.h \
     ItemsImage.h \
-    ../../headers/WSObject.h
+    ../../headers/WSObject.h \
+    ObservedLine.h
 
 FORMS    +=
 

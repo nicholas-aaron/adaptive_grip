@@ -20,8 +20,7 @@ private:
     QGraphicsView *         myView;
     QList<WSObject> *       currentList;
 
-    float                   x_scale;
-    float                   y_scale;
+    QList<WSObject> generateWSObject(int n);
 
 private slots:
     void updateWSObjects(QList<WSObject> * newList);

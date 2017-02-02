@@ -1,6 +1,9 @@
 #include "RobotGUI.h"
 #include "ItemsImage.h"
 
+#include <QDebug>
+#include <math.h>
+
 #define SCREEN_RATIO 5.0
 #define SCENE_WIDTH 600
 #define SCENE_HEIGHT 360
@@ -8,19 +11,24 @@
 #define BUFFER_AMOUNT 25
 
 RobotGUI::RobotGUI() :
-    currentList(0)
+    currentList(NULL)
 {
     // Initialize both the view and the scene
     QGraphicsScene * scene = new QGraphicsScene;
     QGraphicsView * view = new QGraphicsView;
+    QGraphicsRectItem * rect = new QGraphicsRectItem;
+
 
     // Set the scene, and the scene's size
     myScene = scene;
-    myScene->setSceneRect(0, 0, SCENE_WIDTH + BUFFER_AMOUNT, SCENE_HEIGHT+BUFFER_AMOUNT);
+    myScene->setSceneRect(-BUFFER_AMOUNT/2, -BUFFER_AMOUNT/2, SCENE_WIDTH + BUFFER_AMOUNT, SCENE_HEIGHT+BUFFER_AMOUNT);
 
-    // If the anything about the list of WSObjects changes, update the current list in the GUI and redraw the items
-    connect(this, SIGNAL(wsobjectsUpdated(QList<WSObject>*)), this, SLOT(updateWSObjects(QList<WSObject>*)));
-    connect(this, SIGNAL(wsobjectsUpdated(QList<WSObject>*)), this, SLOT(redrawItems()));
+    // TEST FUNCTION
+    QList<WSObject> someList = generateWSObject(10);
+    currentList = &someList;
+    updateWSObjects(&someList);
+    redrawItems();
+    updateWSObjects(currentList);
 
     // Set the view, and resize the view to the dimensions of its parent scene
     myView = view;
@@ -42,7 +50,6 @@ void RobotGUI::updateWSObjects(QList<WSObject> * newList)
 
     // The list has been updated. Their sizes are different
     if (newList->size() != cList.size()) {
-        delete currentList;
         currentList = newList;
         emit wsobjectsUpdated(newList);
     }
@@ -51,7 +58,6 @@ void RobotGUI::updateWSObjects(QList<WSObject> * newList)
     for (int i = 0; i < newList->size(); i++) {
         bool areEqual = (nList[i] == cList[i]);
         if (!areEqual) {
-            delete currentList;
             currentList = newList;
             emit wsobjectsUpdated(newList);
         }
@@ -70,10 +76,33 @@ void RobotGUI::redrawItems()
     myScene->clear();
 
     for (int i = 0; i < currentList->size(); i++) {
-        ItemsImage * item = new ItemsImage(cList[i].id, cList[i].r_display, cList[i].g_display, cList[i].b_display);
-        item->setPos(cList[i].x_position / SCREEN_RATIO, cList[i].y_position / SCREEN_RATIO);
+        ItemsImage * item = new ItemsImage(cList[i]);
+        item->setPos(cList[i].x_position / SCREEN_RATIO, cList[i].y_position / -SCREEN_RATIO);
         myScene->addItem(item);
     }
+}
+
+/**
+ * Function to help test the main functionality of the program
+ * @param n
+ * @return
+ */
+
+QList<WSObject> RobotGUI::generateWSObject(int n)
+{
+    QList<WSObject> list;
+
+    for(int i = 0; i < n; i++) {
+        WSObject wsobject(qrand() % 3000, qrand() % 1795*(-1), 100);
+        wsobject.r_display = qrand() % 256;
+        wsobject.b_display = qrand() % 256;
+        wsobject.g_display = qrand() % 256;
+        wsobject.x_obs_position = qrand() % 3000;
+        wsobject.y_obs_position = qrand() % 1795*(-1);
+        list.append(wsobject);
+    }
+
+    return list;
 }
 
 
