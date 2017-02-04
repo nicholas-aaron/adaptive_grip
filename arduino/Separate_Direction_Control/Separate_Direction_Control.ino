@@ -25,6 +25,7 @@ void setup() { //--------------------------------------------------- SETUP -----
   setPins();
   Serial.begin(9600); 
   Serial.println("Enter number for control option:");
+  Serial.println("0. Print Positions");
   Serial.println("1. Motor 1, Clockwise");
   Serial.println("2. Motor 2, Clockwise");
   Serial.println("3. Motor 3, Clockwise");
@@ -50,13 +51,16 @@ void loop() { // ------------------------------------------------------- MAIN LO
     firstRun = false;  
   }
   
-  //printPositions(positions);
   while (Serial.available()) {
     userInput = Serial.read();
-    Serial.println("Driving Motors");
-    zeroIntArray(motors,ARRAY_SIZE);
-    userMotorChoice(userInput, motors, directions); // Sets new motors array and directions array
-    driveMotor(motors, 5, directions, positions, ARRAY_SIZE);
+    if (userInput =='0'){
+      printPositions(positions);
+    }
+    else{
+      zeroIntArray(motors,ARRAY_SIZE);
+      userMotorChoice(userInput, motors, directions); // Sets new motors array and directions array
+      driveMotor(motors, 5, directions, positions, ARRAY_SIZE);
+    } 
   }
 }
 
