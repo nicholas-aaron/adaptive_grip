@@ -280,11 +280,20 @@ void PCLUtils::addXYZ(const PointT & _this_, const PointT & _plus_this_, PointT 
       _equals_this_.y = _this_.y + _plus_this_.y;
       _equals_this_.z = _this_.z + _plus_this_.z;
    }
+template <typename PointT>
+void PCLUtils::multiplyXYZ(const PointT & _this_, float _times_this_, PointT & _equals_this_)
+   {
+      _equals_this_.x = _this_.x * _times_this_;
+      _equals_this_.y = _this_.y * _times_this_;
+      _equals_this_.z = _this_.z * _times_this_;
+   }
 
 template void PCLUtils::subtractXYZ<pcl::PointXYZ>(const pcl::PointXYZ &, const pcl::PointXYZ &, pcl::PointXYZ &);
 template void PCLUtils::subtractXYZ<pcl::PointXYZRGBA>(const pcl::PointXYZRGBA &, const pcl::PointXYZRGBA &, pcl::PointXYZRGBA &);
 template void PCLUtils::addXYZ<pcl::PointXYZ>(const pcl::PointXYZ &, const pcl::PointXYZ &, pcl::PointXYZ &);
 template void PCLUtils::addXYZ<pcl::PointXYZRGBA>(const pcl::PointXYZRGBA &, const pcl::PointXYZRGBA &, pcl::PointXYZRGBA &);
+template void PCLUtils::multiplyXYZ<pcl::PointXYZ>(const pcl::PointXYZ &, float, pcl::PointXYZ &);
+template void PCLUtils::multiplyXYZ<pcl::PointXYZRGBA>(const pcl::PointXYZRGBA &, float, pcl::PointXYZRGBA &);
 
 template <typename PointT>
 float PCLUtils::distance(const PointT & one, const PointT& two)

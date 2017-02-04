@@ -1,125 +1,111 @@
 #include "RobotGUI.h"
-#include "RobotLimits.h"
 
-#include "math.h"
+#include <QDebug>
+#include <math.h>
 
+#define SCREEN_RATIO 5.0
 #define SCENE_WIDTH 600
 #define SCENE_HEIGHT 360
 
-#define BUFFER_AMOUNT 25
+#define BUFFER_AMOUNT 135
 
-RobotGUI::RobotGUI()
+RobotGUI::RobotGUI() :
+    currentList(NULL)
 {
-    // Initialize the list of items
-    QList<TargetItem> listOfItems;
-
-    // Creates the scene to display the items
+    // Initialize both the view and the scene
     QGraphicsScene * scene = new QGraphicsScene;
-    scene->setSceneRect(0, 0, SCENE_WIDTH + BUFFER_AMOUNT, SCENE_HEIGHT + BUFFER_AMOUNT);
-
-    // Testing the GUI
-    // testAddItems(100, scene, listOfItems);
-    testRmvItems(scene, listOfItems);
-
-    // Visualize the scene
     QGraphicsView * view = new QGraphicsView;
-    view->setScene(scene);
-    view->resize(SCENE_WIDTH + BUFFER_AMOUNT, SCENE_HEIGHT + BUFFER_AMOUNT);
-    view->setWindowTitle("Gantry Robot GUI");
 
-    // Display the view
-    view->show();
+    // Set the scene, and the scene's size
+    myScene = scene;
+    myScene->setSceneRect(-BUFFER_AMOUNT/2, -BUFFER_AMOUNT/2, SCENE_WIDTH + BUFFER_AMOUNT, SCENE_HEIGHT+BUFFER_AMOUNT);
+
+    // TEST FUNCTION
+    QList<WSObject> someList = generateWSObject(10);
+    currentList = &someList;
+    updateWSObjects(&someList);
+    redrawItems();
+    updateWSObjects(currentList);
+
+    // Set the view, and resize the view to the dimensions of its parent scene
+    myView = view;
+    myView->setScene(myScene);
+    myView->resize(myScene->width() + BUFFER_AMOUNT, myScene->height() + BUFFER_AMOUNT);
+    myView->setWindowTitle("Gantry Robot GUI");
+
+    myView->show();
 }
 
-/*
-    Function    : addNewItem
-    Arguments   : QString s, RobotPosition pos, QGraphicsScene *scene, QList list
-    Purpose     : Checks if the RobotPosition pos is valid, and adds an item to
-                  the GUI if it is. Furthermore, saves the item's pointer in a list
-*/
-void RobotGUI::addNewItem(QString s, RobotPosition pos, QGraphicsScene * scene, QList<TargetItem> &list)
+/**
+ * Updates the list of WSObjects that is currently stored within the RobotGUI
+ * @param newList is an updated list of WSObjects that is passed by a user
+ */
+void RobotGUI::updateWSObjects(QList<WSObject> * newList)
 {
-    TargetItem newItem(s, pos, scene);
-    list.append(newItem);
-}
+    QList<WSObject> nList = *newList;
+    QList<WSObject> cList = *currentList;
 
-/*
-    Function    : removeAnItem
-    Arguments   : QString s, QList<TargetItem> list
-    Purpose     : Remove items specified by the user. Removing the item from the scene
-                  does not delete the item. Therefore, it must be done manually by the
-                  user.
-*/
-void RobotGUI::removeAnItem(QString s, QGraphicsScene *scene, QList<TargetItem> &list)
-{
-    for(int i = 0; i < list.size(); i++) {
-        if (list[i].name == s) {
-            scene->removeItem(list[i].image);
-            delete list[i].image;
+    // The list has been updated. Their sizes are different
+    if (newList->size() != cList.size()) {
+        currentList = newList;
+    }
+
+    // If any of the WSObjects have changed, signal that the lists have updated
+    for (int i = 0; i < newList->size(); i++) {
+        bool areEqual = (nList[i] == cList[i]);
+        if (!areEqual) {
+            currentList = newList;
         }
     }
 }
 
-/*
-    Function    : moveAnItem
-    Arguments   : QString s, RobotPosition newPos, QGraphicsScene *scene, QList<TargetItem> &list
-    Purpose     : If an item has been moved by the claw, update its position and redisplays on the GUI
-*/
-void RobotGUI::moveAnItem(QString s, RobotPosition newPos, QList<TargetItem> &list)
+/**
+ * This should only be called after having called updateWSObjects
+ * This function will redraw all items into the scene based on the information
+ * given by the WSObjects in the list
+ */
+void RobotGUI::redrawItems()
 {
-    for (int i = 0; i < list.size(); i++) {
-        if (list[i].name == s) {
-            list[i].updateCoordinates(newPos);
-            list[i].image->setPos(list[i].x, list[i].y);
-        }
+    QList<WSObject> cList = *currentList;
+    QGraphicsRectItem * rect = new QGraphicsRectItem;
+
+
+    myScene->clear();
+
+    for (int i = 0; i < currentList->size(); i++) {
+        ItemsImage * item = new ItemsImage(cList[i]);
+        item->setPos(cList[i].x_position / SCREEN_RATIO, cList[i].y_position / -SCREEN_RATIO);
+        myScene->addItem(item);
     }
+
+    rect->setRect(0, 0, SCENE_WIDTH, SCENE_HEIGHT);
+    myScene->addItem(rect);
 }
 
-/*
-    Function    : checkPosition
-    Arguments   : RobotPosition pos
-    Purpose     : Determines if a given RobotPosition is within the RobotLimits
-                  using the predefined posWithin() function in RobotLimits.h
-*/
-bool RobotGUI::checkPosition(RobotPosition pos)
+/**
+ * Function to help test the main functionality of the program
+ * @param n
+ * @return
+ */
+QList<WSObject> RobotGUI::generateWSObject(int n)
 {
-    RobotLimits lim;
-    bool isPositionValid = lim.posWithin(pos);
+    QList<WSObject> list;
 
-    return isPositionValid;
-}
-
-// TEST FUNCTIONS
-
-void RobotGUI::testAddItems(int n, QGraphicsScene * scene, QList<TargetItem> &list)
-{
     for(int i = 0; i < n; i++) {
-        RobotPosition pos(qrand() % 3000, qrand() % 1795*(-1), 0, 0, 0, 0);
-        RobotGUI::addNewItem("Item", pos, scene, list);
+        WSObject wsobject(qrand() % 3000, qrand() % 1795*(-1), 100);
+        wsobject.r_display = qrand() % 256;
+        wsobject.b_display = qrand() % 256;
+        wsobject.g_display = qrand() % 256;
+        wsobject.x_obs_position = qrand() % 3000;
+        wsobject.y_obs_position = qrand() % 1795*(-1);
+        list.append(wsobject);
     }
+
+    return list;
 }
 
-void RobotGUI::testRmvItems(QGraphicsScene * scene, QList<TargetItem> &list)
-{
-    RobotPosition testPos;
 
-    testPos = generatePos();
-    RobotGUI::addNewItem("Item 1", testPos, scene, list);
 
-    testPos = generatePos();
-    RobotGUI::addNewItem("Item 2", testPos, scene, list);
-
-    testPos = generatePos();
-    RobotGUI::addNewItem("Item 3", testPos, scene, list);
-
-    RobotGUI::removeAnItem("Item 2", scene, list);
-}
-
-RobotPosition RobotGUI::generatePos()
-{
-    RobotPosition pos(qrand() % 3000, qrand() % 1795 * (-1), 0, 0, 0, 0);
-    return pos;
-}
 
 
 
