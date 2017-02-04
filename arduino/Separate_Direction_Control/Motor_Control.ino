@@ -30,6 +30,14 @@ void driveMotor(int (*motors), int degRotation, boolean directions[], int (*posi
     delay(2);
     digitalWrite(STP, LOW);
   }
+  //debugging
+//  for(int i = 0; i < 6; i++){
+//    Serial.print("Position of motor ");
+//    Serial.print(i+1);
+//    Serial.print(" is: ");
+//    Serial.println(positions[i]);
+//  }
+  
 }
 
 void selectMotor(int (*motors), boolean directions[], int (*positions))
@@ -69,6 +77,9 @@ for ( int y = 0; y < 6; y++) { //loop through all of the motors
           }
         }
       }
+      //debugging
+      //Serial.println(positions[y]);
+      
     }
   }
 }
