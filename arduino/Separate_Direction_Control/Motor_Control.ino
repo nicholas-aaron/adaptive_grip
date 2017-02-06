@@ -37,7 +37,6 @@ void driveMotor(int (*motors), int degRotation, boolean directions[], int (*posi
   //    Serial.print(" is: ");
   //    Serial.println(positions[i]);
   //  }
-
 }
 
 void selectMotor(int (*motors), boolean directions[], int (*positions))
@@ -93,7 +92,6 @@ void setPins()
   digitalWrite(DIR_4, LOW);
   digitalWrite(DIR_5, LOW);
   digitalWrite(DIR_6, LOW);
-
 }
 
 void holdPosition(int mSecs)
@@ -168,9 +166,8 @@ void setOriginalPosition(int enablePin, int (*positions))
   digitalWrite(enablePin, LOW); //Turns the motors back on - draws max current so don't remain in this state for a long time
 }
 
-
-
-void openFinger1(int (*motors), boolean directions[], int (*positions)) {
+void openFinger1(int (*motors), boolean directions[], int (*positions)) 
+{
   setPins();
   directions[1] = true;
   directions[3] = true;
@@ -198,7 +195,8 @@ void openFinger1(int (*motors), boolean directions[], int (*positions)) {
     driveMotor(motors, 5, directions, positions, 6);
   }
 }
-void openFinger3(int (*motors), boolean directions[], int (*positions)) {
+void openFinger3(int (*motors), boolean directions[], int (*positions)) 
+{
   setPins();
   directions[2] = true;
   directions[4] = true;
@@ -225,4 +223,84 @@ void openFinger3(int (*motors), boolean directions[], int (*positions)) {
   }
 }
 
+void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*limits))
+{
+  for (int i = 0; i < 6; i++)
+  {
+    directions[i] = true;
+  }
+
+  int check = 1;
+  while(check != 0)
+  {
+    check = 0;
+    for (int i = 0; i < 6; i++)
+      {
+
+        if(positions[i] < limits[i])
+        {
+          motors[i] = i+3;
+          check = check + 1;
+        }
+        else // (positionspi] >= limits[i])
+          motors[i] = 0;
+      }
+   if (check != 0)
+    driveMotor(motors,5,directions,positions,6);
+  }
+}
+
+void closeAllJoints(int (*motors), boolean directions[], int (*positions))
+{
+  for (int i = 0; i < 6; i++)
+  {
+    directions[i] = false;
+  }
+
+  int check = 1;
+  while(check != 0)
+  {
+    check = 0;
+    for (int i = 0; i < 6; i++)
+      { 
+        if(positions[i] > 20) //leave a little room so that i don't over extend
+        {
+          motors[i] = i+3;
+          check = check + 1;
+        }
+        else // (positionspi] >= limits[i])
+          motors[i] = 0;
+      }
+   if (check != 0)
+    driveMotor(motors,5,directions,positions,6);
+  }
+}
+
+void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits))
+{
+
+  for (int i = 0; i < 6; i++)
+  {
+    directions[i] = false;
+  }
+
+  int check = 1;
+  while(check != 0)
+  {
+    check = 0;
+    for (int i = 0; i < 6; i++)
+      {
+        if(positions[i] > limits[i])
+        {
+          motors[i] = i+3;
+          check = check + 1;
+        }
+        else // (positionspi] >= limits[i])
+          motors[i] = 0;
+      }
+   if (check != 0)
+    driveMotor(motors,5,directions,positions,6);
+  }
+
+}
 

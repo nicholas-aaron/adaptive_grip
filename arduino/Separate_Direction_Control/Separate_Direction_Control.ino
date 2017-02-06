@@ -17,6 +17,8 @@ boolean firstRun = true;
 int motors[ARRAY_SIZE] = {1,2,3,4,5,6}; //rotate motor or vibrate in place
 boolean directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
 int positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
+int limits[ARRAY_SIZE] = {700,700,700,600,600,600};
+int curlLimits[ARRAY_SIZE] = {400,400,400,50,50,50};
 
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);

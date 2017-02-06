@@ -84,14 +84,21 @@ void userMotorChoice(char userInput, int (*motors), boolean directions[])
         directions[5] = false;
         break;
     } case 'e': {
-        openFinger1(motors, directions, positions);
+        openAllJoints(motors,directions,positions,limits);
+        curlGrab(motors, directions, positions, curlLimits);
         break;
     } case 'f':{
-        openFinger3(motors,directions,positions);
+        closeAllJoints(motors,directions,positions);
         break;
-    }case 'z': {
+    } case 'h': {
+        openAllJoints(motors,directions,positions,limits);
+        break;
+    }
+
+    case 'z': {
         firstRun = true;
         setPins();
+        break;
     }
       
     default: {
@@ -121,8 +128,9 @@ void displayMenu(){
   Serial.println("b. Motor 4, Counter-Clockwise");
   Serial.println("c. Motor 5, Counter-Clockwise");
   Serial.println("d. Motor 6, Counter-Clockwise");
-  Serial.println("e. Open Finger 1");
+  Serial.println("e. Curl Grab");
   Serial.println("z. Reset positions, claw limp");
-  Serial.println("f. Open Finger 3");
+  Serial.println("f. Close All Joints");
+  Serial.println("h. Open All Joints");
   Serial.println();
 }
