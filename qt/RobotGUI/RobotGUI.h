@@ -1,30 +1,36 @@
 #ifndef ROBOTGUI_H
 #define ROBOTGUI_H
 
-#include "TargetItem.h"
+#include "RobotLimits.h"
+#include "ItemsImage.h"
+#include "../../headers/WSObject.h"
 
-#include <QApplication>
+#include <QWidget>
 #include <QList>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QTimer>
 
-class RobotGUI : public QGraphicsView
+class RobotGUI : public QWidget
 {
+    Q_OBJECT
+
 public:
     RobotGUI();
 
-    QGraphicsScene * scene;
+private:
+    QGraphicsScene *        myScene;
+    QGraphicsView *         myView;
+    QList<WSObject> *       currentList;
+    RobotLimits             limits;
 
-    void addNewItem(QString s, RobotPosition pos, QGraphicsScene * scene, QList<TargetItem> &list);
-    void removeAnItem(QString s, QGraphicsScene * scene, QList<TargetItem> &list);
-    void moveAnItem(QString s, RobotPosition newPos, QList<TargetItem> &list);
-    bool checkPosition (RobotPosition pos);
+    float                   xScale;
+    float                   yScale;
 
-    // TEST FUNCTIONS
-    void testAddItems(int n, QGraphicsScene * scene, QList<TargetItem> &list);
-    void testRmvItems(QGraphicsScene * scene, QList<TargetItem> &list);
-    RobotPosition generatePos();
+    void updateWSObjects(QList<WSObject> * newList);
+    void redrawItems();
+
+    QList<WSObject> generateWSObject(int n);
+
 };
 
 #endif // ROBOTGUI_H

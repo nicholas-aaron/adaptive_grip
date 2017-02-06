@@ -19,13 +19,6 @@ class WSObject {
 
    pcl::PointXYZRGBA   point;
 
-//#ifdef AIDAN
-// float          x_obs_position;
-// float          y_obs_position;
-   int          r_display, g_display, b_display;
-//#endif
-
-
    int            id;
 // float          distance_to(WSObject & o, Eigen::Vector4f & plane);
 

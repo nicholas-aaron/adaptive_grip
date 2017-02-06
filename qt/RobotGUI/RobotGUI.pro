@@ -27,16 +27,18 @@ SOURCES += main.cpp\
     RobotLimits.cpp \
     RobotPosition.cpp \
     RobotGUI.cpp \
-    TargetItem.cpp \
-    ItemsImage.cpp
+    ItemsImage.cpp \
+    ../../src/WSObject.cpp \
+    ObservedLine.cpp
 
 
 HEADERS  += \
     RobotLimits.h \
     RobotPosition.h \
     RobotGUI.h \
-    TargetItem.h \
-    ItemsImage.h
+    ItemsImage.h \
+    ../../headers/WSObject.h \
+    ObservedLine.h
 
 FORMS    +=
 
