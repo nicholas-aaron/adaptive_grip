@@ -2,6 +2,7 @@
 #define WSOBJECT__H
 
 #include <Eigen/Dense>
+#include <pcl/point_types.h>
 
 class WSObject {
 
@@ -10,13 +11,19 @@ class WSObject {
    float          x_position;
    float          y_position;
 
+   // Don't store any z-axis information or "surface" information in 
+   // WSObject. Handle it in Engine2.
+// float          z_height;
+
    float          observation_distance;
 
-#ifdef AIDAN
-   float          x_obs_position;
-   float          y_obs_position;
-   float          r_display, g_display, b_display;
-#endif
+   pcl::PointXYZRGBA   point;
+
+//#ifdef AIDAN
+// float          x_obs_position;
+// float          y_obs_position;
+   int          r_display, g_display, b_display;
+//#endif
 
 
    int            id;

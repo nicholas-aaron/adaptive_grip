@@ -306,3 +306,13 @@ float PCLUtils::distance(const PointT & one, const PointT& two)
 
 template float PCLUtils::distance<pcl::PointXYZ>(const pcl::PointXYZ &, const pcl::PointXYZ &);
 template float PCLUtils::distance<pcl::PointXYZRGBA>(const pcl::PointXYZRGBA &, const pcl::PointXYZRGBA &);
+
+
+void PCLUtils::dbWaitForEnter(std::string msg)
+{
+   char Enter = 0x0a;
+   char c = 0;
+   std::cout << "[DEBUG] " << msg << std::endl;
+   std::cout << "[Press Enter to Continue]" << std::endl;
+   do std::cin.get(c); while (c != Enter);
+}

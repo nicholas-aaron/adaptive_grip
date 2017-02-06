@@ -26,7 +26,7 @@ PlaneFilter<PointT>::filter_plane()
       _compute_separator();
       
       std::vector<int> indices;
-   pcl::removeNaNFromPointCloud(*_cloud, *_cloud, indices);
+      pcl::removeNaNFromPointCloud(*_cloud, *_cloud, indices);
 
       get_filtered_centroid(claw_point);
       _filter_cloud();
@@ -63,11 +63,15 @@ template<typename PointT>
 void
 PlaneFilter<PointT>::_filter_cloud() 
 {
+   std::cout << "DEBUG: before filter, _cloud->size() = " << _cloud->size() << std::endl;
+
    _clipper.setPlaneParameters(_plane_vector);
    _inliers->indices.clear();
    _clipper.clipPointCloud3D(*_cloud, _inliers->indices);
    _extract.setIndices(_inliers);
    _extract.filterDirectly(_cloud);
+
+   std::cout << "DEBUG: after filter, _cloud->size() = " << _cloud->size() << std::endl;
 }
 
 template<typename PointT> 

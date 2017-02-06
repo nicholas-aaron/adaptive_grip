@@ -1,72 +1,139 @@
-#ifndef ENGINE3__H
-#define ENGINE3__H
-
 #include "Engine2.h"
-#include "Mutex.h"
-#include <pcl/io/openni_grabber.h>
+#include <Eigen/Dense>
+#include <pcl/visualization/pcl_plotter.h>
+
+#define PI 3.14159265
 
 class Engine3 : public Engine2 {
 
-   using Engine2::Point;
-   Mutex * mutex;
+public: 
 
-public:
-   pcl::visualization::PCLVisualizer::Ptr vis_live;
+   pcl::visualization::PCLPlotter * plotter;
 
    Engine3(
-         pcl::visualization::PCLVisualizer::Ptr vis   = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("viewer")),
-         Logger * logger                              = new Logger(),
-         pcl::visualization::PCLVisualizer::Ptr _vis_live = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("live viewer"))):
-      Engine2(vis, logger),
-      vis_live(_vis_live)
-   {} // use Engine2 constructor
+         pcl::visualization::PCLVisualizer::Ptr _vis,
+         Logger * _logger) : Engine2(_vis, _logger) {
+      plotter = NULL;   }
 
-   void moveTo(RobotPosition & position)
+   PointCloud::Ptr closest_cluster;
+   double          claw_angle;
+
+   int scan()
    {
-      std::cout << "Entering Engine3::moveTo()" << std::endl;
+      Engine2::scan();
 
-      // In the main thread: register the Camera with a callback to update vis_live
+      closest_cluster.reset(new PointCloud());
+      
+      // TODO this will break any of the "center" or "move to" methods
+      // Colour the closest cluster. Will be at the same index as the 'centroid'
+      const std::vector<WSObject>::iterator closest = get_closest_object();
 
-      boost::function<void (const pcl::PointCloud<Point>::ConstPtr &)> callback_function
-         = boost::bind(&Engine3::_live_cam_callback, this, _1);
+      // TODO THIS WILL ONLY BE TRUE FOR THE FIRST SCAN.
+      int cluster_index = std::distance(m_objects->begin(), closest);
+      {
+         stringstream msg;
+         msg << "Engine3(): current_view.cf->m_clusters.size() = " << current_view.cf->m_clusters.size() << endl;
+         msg << "closest_index = " << cluster_index << endl;
+         msg << "Engine3()::scan - size of closest cluster = " << current_view.cf->m_clusters[cluster_index].indices.size();
+         std::cout  << msg.str() << endl;
+         m_logger->log(msg);
+      }
 
-//    pcl::PointCloud<Point>::Ptr live_cloud_ptr (new pcl::PointCloud<Point>);
-//    vis_live->addPointCloud<Point>(live_cloud_ptr, "live_cloud");
 
-      // Instantiate the interface and register the callback
-      pcl::Grabber * interface = new pcl::OpenNIGrabber();
-      interface->registerCallback(callback_function);
-      interface->start();
+      typedef std::vector<int>::const_iterator IndicesIt;
+      for (IndicesIt it = current_view.cf->m_clusters[cluster_index].indices.begin();
+            it != current_view.cf->m_clusters[cluster_index].indices.end(); ++it)
+      {
+         // copy these indices of current_view
+         closest_cluster->push_back((*current_view.cloud)[*it]);
+      }
 
-      // Interesting, can't put &Engine2::move_to in a boost::bind
-      boost::thread     move_to_thread(boost::bind(&Engine3::superclass_move_to, this, position));
+      add_cloud_to_viewer(closest_cluster, "ClosestCluster", vp_calibration_axes, 255, 0, 0);
 
-//    while (!vis_live->wasStopped())  // This will freeze
-//    {
-//       mutex->lock();
-//       vis_live->spinOnce(20);
-//       mutex->unlock();
-//    }
+      // Now, we have the entire cluster, and its 
+      
+   // create_surface_map(closest_cluster, (*current_view.clusters)[cluster_index]);
 
-      move_to_thread.join();
-
-      interface->stop();
    }
-   
-   void superclass_move_to(RobotPosition & pos)
+
+   int create_surface_map(PointCloud::Ptr surface, const Point & centroid)
    {
-      Engine2::moveTo(pos);
+      typedef PointCloud::const_iterator Iterator;
+      using PCLUtils::dot_double_normalize;
+      
+  //  std::vector<float> x_values;
+  //  std::vector<float> y_values;
+      std::vector<std::pair<double, double> > coordinates;
+      Point difference;
+
+      float x_diff, y_diff;
+
+      for (Iterator i = surface->begin(); i != surface->end(); ++i)
+      {
+         // Get the difference
+         PCLUtils::subtractXYZ(*i, centroid, difference);
+
+         // Dot the difference with the x vector
+         x_diff = dot_double_normalize(difference, m_cal.x_vector);
+
+         // Dot the difference with the y vector
+         y_diff = dot_double_normalize(difference, m_cal.y_vector);
+
+         // x/y is backwards in one of the Coordinate.h class or
+         // this..
+         coordinates.push_back(std::pair<double, double> (y_diff, x_diff));
+         
+      }
+
+      float slope_a, intercept_b;
+      {
+         //http://math.stackexchange.com/questions/204020/what-is-the-equation-used-to-calculate-a-linear-trendline
+         // CALCULATE SLOPE
+         //
+         typedef std::vector<std::pair<double, double> >::iterator Iterator;
+
+         float sum_xy   = 0.0;
+         float sum_x    = 0.0;
+         float sum_y    = 0.0;
+         float sum_x2   = 0.0;
+         float sum_y2   = 0.0;
+         float n        = (float) coordinates.size();
+
+         for (Iterator i = coordinates.begin(); i != coordinates.end();
+               i++)
+         {
+            sum_xy   += i->first * i->second;
+            sum_x    += i->first;
+            sum_y    += i->second;
+            sum_x2   += (i->first * i->first);
+            sum_y2   += (i->second * i->second);
+         }
+
+         slope_a = (n * sum_xy) - (sum_x * sum_y);
+         slope_a = slope_a / (n * sum_x2 - (sum_x*sum_x));
+         intercept_b = (sum_y - slope_a * sum_x) / n;
+      }
+
+      std::vector<double> trendline(2, 0);
+      trendline[1] = slope_a;
+      trendline[2] = intercept_b;
+
+      claw_angle = atan(slope_a) * 180 / PI;
+      {
+         stringstream msg;
+         msg << "Calculated slope = " << claw_angle << std::endl;
+         m_logger->log(msg);
+      }
+
+  //  if (plotter != NULL) {
+  //     delete plotter;
+  //  }
+  //  plotter = new pcl::visualization::PCLPlotter();
+  //  plotter->addPlotData(trendline, -4, 4, "trendline");
+  //  plotter->addPlotData(coordinates, "coordinates", vtkChart::POINTS);
+  //  plotter->plot();
    }
 
-private:
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-   void _live_cam_callback(const pcl::PointCloud<Point>::ConstPtr &cloud)
-   {
-//    pcl::PointCloud<Point>::Ptr   live_cloud_ptr(new pcl::PointCloud<Point>::Ptr);
-      mutex->lock();
-      vis_live->updatePointCloud(cloud, "live_cloud");
-      mutex->unlock();
-   }
 };
-
-#endif // ENGINE3__H

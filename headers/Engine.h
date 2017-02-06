@@ -46,14 +46,14 @@ public:
       Line(Point _p1, Point _p2) :
          p1(_p1), p2(_p2) {}
 
-      Line( const Line &copy) :
+      Line(const Line &copy) :
          p1(copy.p1), p2(copy.p2) {}
       
    };
 
    typedef struct Line LineT;
 
-   Point claw_point;
+// Point claw_point;
 
 private:
 

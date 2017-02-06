@@ -57,11 +57,12 @@ template <typename PointT> class ClusterFinder {
 
    CloudPtr get_clusters();
 
+   CloudPtr                                           _input_cloud;
+
    private:
 
    int _downsample();
 
-   CloudPtr                                           _input_cloud;
    CloudPtr                                           _ds_cloud; // The downsampled point-cloud
    int                                                _downsample_factor;
    Mutex *                                            _cloud_mutex;

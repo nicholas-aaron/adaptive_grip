@@ -17,11 +17,13 @@ public:
       PointCloud::Ptr      clusters;
 
       CCloud() {
+         cf = NULL;
          cloud.reset(new PointCloud());
          initialized    = false;
       }
 
       CCloud(PointCloud::Ptr _cloud) {
+         cf = NULL;
          cloud          = _cloud;
          initialized    = false;
       }
@@ -40,12 +42,19 @@ public:
          return clusters->end();
       }
 
+         ClusterFinder<Point> * cf;
       void find_clusters()
       {
          Mutex m; // TODO un-mutex this code
-         ClusterFinder<Point> cf(cloud, &m);
-         cf.find_clusters();
-         clusters = cf.get_clusters();
+
+         if (cf != NULL) {
+            delete cf;
+         } 
+
+         cf = new ClusterFinder<Point>(cloud, &m);
+
+         cf->find_clusters();
+         clusters = cf->get_clusters();
       }
 };
 

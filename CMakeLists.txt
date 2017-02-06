@@ -36,6 +36,7 @@ include_directories(${INCLUDE_DIRECTORIES} "/Users/amnicholas/Documents/ELEC490/
 
 
 # Suppress some warnings that we aren't going to fix
+# Older compiler's won't have this
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-deprecated-register -Wno-inconsistent-missing-override -std=c++11")
 
 

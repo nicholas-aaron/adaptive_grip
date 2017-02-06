@@ -19,6 +19,8 @@
 
 #include "Logger.h"
 
+#define DMSG(x) PCLUtils::dbWaitForEnter(x);
+
 class MyPointRepresentation : public pcl::PointRepresentation <pcl::PointNormal>
 {
   using pcl::PointRepresentation<pcl::PointNormal>::nr_dimensions_;
@@ -71,7 +73,12 @@ template <typename PointT>
 void addXYZ(const PointT&, const PointT&, PointT &);
 
 template <typename PointT>
+void multiplyXYZ(const PointT&, float, PointT &);
+
+template <typename PointT>
 float distance(const PointT&, const PointT&);
+
+void dbWaitForEnter(std::string);
 
 }
 

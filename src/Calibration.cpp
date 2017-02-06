@@ -29,8 +29,12 @@ bool Calibration::fromFile(const std::string& filename)
       y_vector.y = y_vec_y;
       y_vector.z = y_vec_z;
 
-      cerr << "Calibration::fromFile() WARNING - Initializing x_adj_vector to: " << x_adj_amt << endl;;
-      cerr << "Calibration::fromFile() WARNING - Initializing y_adj_vector to: " << y_adj_amt << endl;;
+      {
+         x_adj_amt = -2.80;
+         y_adj_amt = 0.8;
+         cerr << "Calibration::fromFile() WARNING - Initializing x_adj_vector to: " << x_adj_amt << endl;;
+         cerr << "Calibration::fromFile() WARNING - Initializing y_adj_vector to: " << y_adj_amt << endl;;
+      }
 
       return true;
    } else return false;

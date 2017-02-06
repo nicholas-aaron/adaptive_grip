@@ -31,7 +31,6 @@ public:
 private:
 
    void                             _update_cloud_callback(const typename pcl::PointCloud<PointT>::ConstPtr &cloud); 
-   
    CloudConstPtr                    _camera_cloud;
    Mutex *                          _cloud_mutex;
    bool                             _retrieved_cloud;
