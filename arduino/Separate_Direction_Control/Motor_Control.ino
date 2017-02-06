@@ -24,35 +24,35 @@ void driveMotor(int (*motors), int degRotation, boolean directions[], int (*posi
       dirSwitch = !dirSwitch;
     }
 
-    selectMotor(motors, directions, positions); 
+    selectMotor(motors, directions, positions);
     delay(2);
     digitalWrite(STP, HIGH);
     delay(2);
     digitalWrite(STP, LOW);
   }
   //debugging
-//  for(int i = 0; i < 6; i++){
-//    Serial.print("Position of motor ");
-//    Serial.print(i+1);
-//    Serial.print(" is: ");
-//    Serial.println(positions[i]);
-//  }
-  
+  //  for(int i = 0; i < 6; i++){
+  //    Serial.print("Position of motor ");
+  //    Serial.print(i+1);
+  //    Serial.print(" is: ");
+  //    Serial.println(positions[i]);
+  //  }
+
 }
 
 void selectMotor(int (*motors), boolean directions[], int (*positions))
 {
-for ( int y = 0; y < 6; y++) { //loop through all of the motors
+  for ( int y = 0; y < 6; y++) { //loop through all of the motors
     if (motors[y] != 0) { // mtr[y] set to zero if motor if not intended on moving
-      if (directions[y]) { //Close
+      if (directions[y]) { //Open
         if (y == 0 || y == 1 || y == 4) { // These motors close with HIGH direction command
           digitalWrite(motors[y], HIGH);
-          positions[y] = positions[y] - 1;
+          positions[y] = positions[y] + 1;
         }
         else {
-          if (y == 2 || y == 3 || y == 5) {// These motors close with LOW directino command
+          if (y == 2 || y == 3 || y == 5) {// These motors close with HIGH directino command
             digitalWrite(motors[y], LOW);
-            positions[y] = positions[y] - 1;
+            positions[y] = positions[y] + 1;
           }
           else {
             digitalWrite(motors[y], HIGH);
@@ -61,15 +61,15 @@ for ( int y = 0; y < 6; y++) { //loop through all of the motors
           }
         }
       }
-      else { //Open
-        if (y == 0 || y == 1 || y == 4) { // These motors close with HIGH direction command
+      else { //Close
+        if (y == 0 || y == 1 || y == 4) { // These motors close with LOW direction command
           digitalWrite(motors[y], LOW);
-          positions[y] = positions[y] + 1;
+          positions[y] = positions[y] - 1;
         }
         else {
           if (y == 2 || y == 3 || y == 5) {// These motors close with LOW directino command
             digitalWrite(motors[y], HIGH);
-            positions[y] = positions[y] + 1;
+            positions[y] = positions[y] - 1;
           }
           else {
             digitalWrite(motors[y], HIGH);
@@ -79,7 +79,7 @@ for ( int y = 0; y < 6; y++) { //loop through all of the motors
       }
       //debugging
       //Serial.println(positions[y]);
-      
+
     }
   }
 }
@@ -122,7 +122,7 @@ void holdPosition(int mSecs)
   }
 }
 
-void testAllMotors(int (*motors), boolean directions[], int (*positions)) 
+void testAllMotors(int (*motors), boolean directions[], int (*positions))
 {
 
   int idx[6] = {0, 0, 0, 0, 0, 0};
@@ -145,7 +145,7 @@ void testAllMotors(int (*motors), boolean directions[], int (*positions))
   }
 }
 
-void setMotors(int (*index), int (*motors)) 
+void setMotors(int (*index), int (*motors))
 {
   for (int x = 0; x < 6; x++) {
     if (index[x] == 1)
@@ -155,7 +155,7 @@ void setMotors(int (*index), int (*motors))
   }
 }
 
-void setOriginalPosition(int enablePin, int (*positions)) 
+void setOriginalPosition(int enablePin, int (*positions))
 {
   char userInput;
   Serial.println("Please turn the motors to their initial positions, then enter some serial data");
@@ -168,66 +168,61 @@ void setOriginalPosition(int enablePin, int (*positions))
   digitalWrite(enablePin, LOW); //Turns the motors back on - draws max current so don't remain in this state for a long time
 }
 
-void userMotorChoice(char userInput, int (*motors), boolean directions[]) 
-{
-  switch (userInput) {
-    case '1': {
-      motors[0] = DIR_1;
-      directions[0] = true;
-      break;
-    } case '2': {
-      motors[1] = DIR_2;
-      directions[1] = true;
-      break;
-    } case '3': {
-      motors[2] = DIR_3;
-      directions[2] = true;
-      break;
-    } case '4': {
+
+
+void openFinger1(int (*motors), boolean directions[], int (*positions)) {
+  setPins();
+  directions[1] = true;
+  directions[3] = true;
+  motors[1] = DIR_2; // these two motors will be moving
+  motors[3] = DIR_4;
+  int limit_1 = 900;
+  int limit_3 = 630;
+
+  while (positions[1] < limit_1 || positions[3] < limit_3) {
+    if (positions[1] < limit_1 && positions[3] < limit_3) {
+      motors[1] = DIR_2; // these two motors will be moving
       motors[3] = DIR_4;
-      directions[3] = true;
-      break;
-    } case '5': {
-      motors[4] = DIR_5;
-      directions[4] = true;
-      break;
-    } case '6': {
-      motors[5] = DIR_6;
-      directions[5] = true;
-      break;
-    } case '7': {
-      motors[0] = DIR_1;
-      directions[0] = false;
-      break;
-    } case '8': {
-      motors[1] = DIR_2;
-      directions[1] = false;
-      break;
-    } case 'a': {
-      motors[2] = DIR_3;
-      directions[2] = false;
-      break;
-    } case 'b': {
-      motors[3] = DIR_4;
-      directions[3] = false;
-      break;
-    } case 'c': {
-      motors[4] = DIR_5;
-      directions[4] = false;
-      break;
-    } case 'd': {
-      motors[5] = DIR_6;
-      directions[5] = false;
-      break;
     }
-    default: {
-        //do something
-      Serial.println("ERROR, User input was incorrect");
-      directions[0] = false;
-      break;
+    else {
+      if (positions[1] < limit_1)
+      {
+        motors[1] = DIR_2; // these two motors will be moving
+        motors[3] = 0;
+      }
+      else {
+        motors[1] = 0; // these two motors will be moving
+        motors[3] = DIR_4;
+      }
     }
+    driveMotor(motors, 5, directions, positions, 6);
   }
 }
+void openFinger3(int (*motors), boolean directions[], int (*positions)) {
+  setPins();
+  directions[2] = true;
+  directions[4] = true;
+  int limit_1 = 900;
+  int limit_3 = 600;
 
+  while (positions[2] < limit_1 || positions[4] < limit_3) {
+    if (positions[2] < limit_1 && positions[4] < limit_3) {
+      motors[2] = DIR_3; // these two motors will be moving
+      motors[4] = DIR_5;
+    }
+    else {
+      if (positions[2] < limit_1)
+      {
+        motors[2] = DIR_3; // these two motors will be moving
+        motors[4] = 0;
+      }
+      else {
+        motors[2] = 0; // these two motors will be moving
+        motors[4] = DIR_5;
+      }
+    }
+    driveMotor(motors, 5, directions, positions, 6);
+  }
+}
 
 

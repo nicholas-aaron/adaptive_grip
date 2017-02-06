@@ -12,10 +12,11 @@
 //Declare variables for functions
 char userInput;
 boolean firstRun = true;
+
 //Arrays
 int motors[ARRAY_SIZE] = {1,2,3,4,5,6}; //rotate motor or vibrate in place
 boolean directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
-int positions[ARRAY_SIZE] = {0,0,0,0,0,0};//with respect to 'home' position
+int positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
 
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);
@@ -55,29 +56,12 @@ void loop() { // ------------------------------------------------------- MAIN LO
 //        Serial.print(" is: ");
 //        Serial.println(positions[i]);
 //      }
-      displayMenu();
+      //displayMenu();
     } 
   }
 }
 
-void displayMenu(){
-  Serial.println("Enter number for control option:");
-  Serial.println("0. Print Positions");
-  Serial.println("1. Motor 1, Clockwise");
-  Serial.println("2. Motor 2, Clockwise");
-  Serial.println("3. Motor 3, Clockwise");
-  Serial.println("4. Motor 4, Clockwise");
-  Serial.println("4. Motor 4, Clockwise");
-  Serial.println("5. Motor 5, Clockwise");
-  Serial.println("6. Motor 6, Clockwise");
-  Serial.println("7. Motor 1, Counter-Clockwise");
-  Serial.println("8. Motor 2, Counter-Clockwise");
-  Serial.println("a. Motor 3, Counter-Clockwise");
-  Serial.println("b. Motor 4, Counter-Clockwise");
-  Serial.println("c. Motor 5, Counter-Clockwise");
-  Serial.println("d. Motor 6, Counter-Clockwise");
-  Serial.println();
-}
+
 
 
 
