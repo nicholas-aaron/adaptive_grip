@@ -48,6 +48,7 @@ int Engine2::add_object(Point point, bool closest)
 
    WSObject * update_object;
    WSObject * new_obj = NULL;
+
    if (it != m_objects->end()) { // We found the object already
       update_object = &(*it);
    } else { // We didnt
@@ -59,6 +60,9 @@ int Engine2::add_object(Point point, bool closest)
    } 
 
    update_object->point = point;
+   update_object->observation_distance = observation_distance;
+
+   
 
    // Update R, G, B
    if (closest) {
@@ -117,6 +121,10 @@ bool Engine2::calculate_robot_position(const Point & position, RobotPosition & n
 {
    Point vector_along_floor;
 
+   /*
+    * Calculate the X and Y RobotPosition of the observed point
+    */
+
    PCLUtils::subtractXYZ(position, get_claw_center_projection(), vector_along_floor);
 
    float x_amt = PCLUtils::dot_double_normalize(vector_along_floor, m_cal.x_vector);
@@ -125,6 +133,18 @@ bool Engine2::calculate_robot_position(const Point & position, RobotPosition & n
    new_pos.x += (-1.0 * x_amt * m_cal.x_rpos_amt);
    new_pos.y += (-1.0 * y_amt * m_cal.y_rpos_amt);
 
+   /*
+    * Calculate its "Z" value. Get its distance from the plane.
+    */
+
+   Cluster<Point> point_cluster(position);
+   float distance_to_plane = point_cluster.get_distance_to_plane(m_floor_plane);
+
+   {
+      std::stringstream msg;
+      msg << "Calculated a distance-to-plane of " << distance_to_plane << ".";
+      m_logger->log(msg);
+   }
 
    return validate_limits(new_pos);
 }
@@ -303,6 +323,7 @@ int Engine2::scan()
    }
 }
 
+// fucking broken!!
 std::vector<WSObject>::iterator Engine2::get_closest_object()
 {
    typedef std::vector<WSObject>::iterator Iterator;
@@ -331,23 +352,20 @@ std::vector<WSObject>::iterator Engine2::get_closest_object()
 //bool Engine2::prepare_grab(Point &centroid)
 //
 //Use after a scan only
-bool Engine2::vantage_point(std::vector<WSObject>::iterator obj)
+bool Engine2::vantage_point(std::vector<WSObject>::iterator object)
 {
-   scan();
-   RobotPosition cam_position = getPosition();
-   if (!calculate_camera_position(obj->point, cam_position))
    {
-      stringstream ss;
-      ss << "OBSERVATION Position: " << cam_position;
-      m_logger->log(ss);
-      m_logger->log("prepare_grab() - the calculated RobotPosition to observe the object is outside of robot limits. Aborting.");
-      return false;
-   } 
+      std::stringstream msg;
+      msg << "vantage-pointing to Object [" << object->id << "].";
+      m_logger->log(msg);
+   }
 
-// cam_position.z = properties.vantage_point_claw_height;
-   cam_position.z = 0.0;
-   moveTo(cam_position);
-
+   m_logger->log("Warning: moving to a hard-coded \"vantage\" point to re-scan.");
+   RobotPosition initial = getPosition();
+   initial.x = object->x_position + 150.0; // Empirically determined
+   initial.y = object->y_position;
+   initial.z = 200.0; // pretty high
+   moveTo(initial);
    return true;
 }
 
@@ -511,15 +529,6 @@ bool Engine2::add_objects(ClusterCloud & cloud)
 
    for (Iterator i = cloud.begin(); i != cloud.end(); ++i)
    {
-//   OLD --   RobotPosition pos = currentPos;
-//   OLD --   calculate_robot_position(*i, pos);
-//   OLD --   if (i == closest_cluster) {
-//   OLD --      i->r = 0; i->g = 255; i->b = 255;
-//   OLD --      add_object(pos.x, pos.y, currentPos, CLOSEST_OBJECT);
-//   OLD --   } else {
-//   OLD --      i->r = 0; i->g = 255; i->b = 0;
-//   OLD --      add_object(pos.x, pos.y, currentPos, DEFAULT_OBJECT);
-//   OLD --   }
       if (i == closest_cluster) {
          i->r = 0; i->g = 255; i->b = 255;
          add_object(*i, true);
@@ -528,8 +537,6 @@ bool Engine2::add_objects(ClusterCloud & cloud)
          add_object(*i, false);
       }
    }
-
-// get_closest_object
 
    add_cluster_to_viewer(cloud.clusters, "CurrentCloud_Clusters", vp_navigation);
 
@@ -548,42 +555,27 @@ Engine2::move_to_object(int index)
       return FAILURE;
    }
 
-// RobotPosition new_pos = getPosition();
-// new_pos.x = (*m_objects)[index].x_position;
-// new_pos.y = (*m_objects)[index].y_position;
-// 
-// moveTo(new_pos);
-
-   // This will move us to the nearest object
-// int locate_result = locate(false);
-// locate();
-
-// std::stringstream msg;
-// msg << "Engine2::move_to_object() - DEBUG: locate() returned << " << locate_result << ".";
-// m_logger->log(msg);
-
    std::vector<WSObject>::iterator object = m_objects->begin();
    std::advance(object, index);
 
-   DMSG("move_to_object(): moving to vantage point.")
-   {
-      std::stringstream msg;
-      msg << "vantage-pointing to Object [" << object->id << "].";
-      m_logger->log(msg);
-   }
 
-   RobotPosition initial = getPosition();
-   initial.x = object->x_position + 100.0;
-   initial.y = object->y_position;
-   moveTo(initial);
+// DMSG("move_to_object(): moving to vantage point.")
+// {
+//    std::stringstream msg;
+//    msg << "vantage-pointing to Object [" << object->id << "].";
+//    m_logger->log(msg);
+// }
 
-// vantage_point(object);
+// m_logger->log("Warning: moving to a hard-coded \"vantage\" point to re-scan.");
+// RobotPosition initial = getPosition();
+// initial.x = object->x_position + 150.0; // Empirically determined
+// initial.y = object->y_position;
+// initial.z = 0.0;
+// moveTo(initial);
 
-// DMSG("Preparing to re-scan.")
-// scan();
+   vantage_point(object);
 
-// DMSG("Preparing to pick up.")
-   {
+   { // Message block
       std::stringstream msg;
       msg << "Picking up Object [" << object->id << "].";
       m_logger->log(msg);

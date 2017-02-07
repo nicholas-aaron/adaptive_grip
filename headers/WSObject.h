@@ -17,6 +17,10 @@ class WSObject {
 
    float          observation_distance;
 
+   float x_obs_position;
+   float y_obs_position;
+   float r_display, g_display, b_display;
+
    pcl::PointXYZRGBA   point;
 
    int            id;
@@ -31,6 +35,8 @@ class WSObject {
 
    // Copy constructor
    WSObject(const WSObject & copy); 
+
+   bool operator==(const WSObject& ws) const;
 
 };
 

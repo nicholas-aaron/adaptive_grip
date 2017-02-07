@@ -148,7 +148,7 @@ public:
 
    bool add_objects(ClusterCloud & cloud);
 
-   int  move_to_object(int);
+   virtual int  move_to_object(int);
 
    void clear_objects();
 
@@ -162,7 +162,7 @@ public:
    std::vector<WSObject>::iterator get_closest_object();
 
    bool vantage_point(std::vector<WSObject>::iterator);
-   bool pickup(std::vector<WSObject>::iterator);
+   virtual bool pickup(std::vector<WSObject>::iterator);
 
 public:
    // Just in case..

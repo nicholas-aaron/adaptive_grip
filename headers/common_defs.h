@@ -10,5 +10,10 @@
 // (int) return codes
 #define SUCCESS 0
 #define FAILURE 1
+// Points 0.05 (5cm) above the floor and closer are removed, by default.
+#define DEFAULT_FLOOR_HEIGHT 0.10 // Better than 0.05. Gets rid of wood on the floor too.
+
+// Empirically tested - for a max height of 0.10 + 0.25 = 0.35m
+#define DEFAULT_PLANE_SEPARATION 0.25
 
 #endif
