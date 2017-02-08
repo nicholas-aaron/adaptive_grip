@@ -1,4 +1,4 @@
-#include "../headers/WSObject.h"
+#include "WSObject.h"
 
 WSObject::WSObject(float x, float y, float obs_dist) :
    x_position(x), y_position(y), observation_distance(obs_dist)

@@ -22,14 +22,15 @@ project(fourxx)
 
 # Locate the PCL and Readling Packages - we need them
 find_package(PCL 1.2 REQUIRED)
-find_package(Readline REQUIRED)
+#find_package(Readline REQUIRED)
 find_package(Boost 1.48.0 REQUIRED COMPONENTS thread)
 
 # Set include directories
 #include_directories (headers
 #  /Users/amnicholas/Documents/ELEC490/Group3/original/headers)
 include_directories(headers /home/robot/Documents/Group3/original/headers)
-include_directories(${INCLUDE_DIRECTORIES} ${PCL_INCLUDE_DIRS} ${Readline_INCLUDE_DIR})
+#include_directories(${INCLUDE_DIRECTORIES} ${PCL_INCLUDE_DIRS} ${Readline_INCLUDE_DIR})
+include_directories(${INCLUDE_DIRECTORIES} ${PCL_INCLUDE_DIRS})
 include_directories(${INCLUDE_DIRECTORIES} "$ENV{FOURXX}/headers")
 
 # Original "Robot" include directory..

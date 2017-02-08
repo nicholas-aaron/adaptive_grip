@@ -62,8 +62,6 @@ int Engine2::add_object(Point point, bool closest)
    update_object->point = point;
    update_object->observation_distance = observation_distance;
 
-   
-
    // Update R, G, B
    if (closest) {
       update_object->r_display = 0;
@@ -74,7 +72,6 @@ int Engine2::add_object(Point point, bool closest)
       update_object->g_display = 255;
       update_object->b_display = 0;
    }
-
 
    if (new_obj) {
       m_objects->push_back(*update_object);
@@ -92,12 +89,12 @@ bool Engine2::remove_object(float x, float y) {
 
 RobotPosition  Engine2::getPosition()
 {
-// return m_robot->currentPos();
-   if (!position_valid) {
-      currentPosition = m_robot->currentPos();
-   }
-   position_valid = true;
-   return currentPosition;
+   return m_robot->currentPos();
+// if (!position_valid) {
+//    currentPosition = m_robot->currentPos();
+// }
+// position_valid = true;
+// return currentPosition;
 }
 
 
@@ -185,7 +182,7 @@ void Engine2::calibrate()
 void Engine2::load()
 {
     using std::cout;
-   const std::string calFile = "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/data/calibration.dat";
+   const std::string calFile = "/home/robot/Documents/Group3/adaptive_grip/data/calibration.dat";
    if (m_cal.fromFile(calFile)) {
       cout << "Succesfully loaded file." << endl;
       cout << m_cal.toString() << endl;
@@ -481,7 +478,7 @@ Engine2::Engine2(pcl::visualization::PCLVisualizer::Ptr vis,
    cam_cloud_(new PointCloud()),
    dummy_mutex_(new Mutex()),
    m_camera(cam_cloud_, dummy_mutex_),
-   m_robot(new RobotExt("/dev/cu.usbserial")),
+   m_robot(new RobotExt("/dev/gantry")),
    m_logger(logger)
    
 {
@@ -511,7 +508,7 @@ Engine2::Engine2(pcl::visualization::PCLVisualizer::Ptr vis,
 
 bool Engine2::add_objects(ClusterCloud & cloud)
 {
-   RobotPosition currentPos = getPosition();
+// RobotPosition currentPos = getPosition();
 
    typedef     PointCloud::iterator  Iterator;
 

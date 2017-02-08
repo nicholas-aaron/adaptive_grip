@@ -26,11 +26,15 @@ class WSObject {
    static float   distance_fudge;
    static int     current_id;
 
+	float x_obs_position, y_obs_position;
+	float r_display, g_display, b_display;
 
    WSObject(float x, float y, float obs_dist);
 
    // Copy constructor
    WSObject(const WSObject & copy); 
+
+	bool operator== (const WSObject& ws) const;
 
 };
 
