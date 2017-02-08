@@ -1,7 +1,6 @@
 #ifndef WSOBJECT__H
 #define WSOBJECT__H
 
-#include <Eigen/Dense>
 #include <pcl/point_types.h>
 
 class WSObject {
@@ -20,17 +19,22 @@ class WSObject {
    pcl::PointXYZRGBA   point;
 
    int            id;
-// float          distance_to(WSObject & o, Eigen::Vector4f & plane);
 
    static float   fudge;
    static float   distance_fudge;
    static int     current_id;
+
+	float x_obs_position;
+	float y_obs_position;
+	float r_display,b_display,g_display;
 
 
    WSObject(float x, float y, float obs_dist);
 
    // Copy constructor
    WSObject(const WSObject & copy); 
+
+	bool operator== (const WSObject& ws) const;
 
 };
 
