@@ -44,6 +44,15 @@ public:
 
 namespace PCLUtils {
 
+   typedef enum {
+      X,
+      Y,
+      Z,
+      J4,
+      J5,
+      J6
+   } Direction;
+
    template <typename PointT>
    float vector_length(PointT point)
    {

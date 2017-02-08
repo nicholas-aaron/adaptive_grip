@@ -92,7 +92,12 @@ bool Engine2::remove_object(float x, float y) {
 
 RobotPosition  Engine2::getPosition()
 {
-   return m_robot->currentPos();
+// return m_robot->currentPos();
+   if (!position_valid) {
+      currentPosition = m_robot->currentPos();
+   }
+   position_valid = true;
+   return currentPosition;
 }
 
 
@@ -199,6 +204,9 @@ void Engine2::load()
       ClusterCloud target; // dummy ClusterCloud to get floor coefficients
       load_and_filter(target);
    }
+
+   // Set up the claw line.
+   move_claw_line(m_cal.x_adj_amt, m_cal.y_adj_amt, 0);
 }
 
 bool Engine2::calibrate_axis(bool x_yb, float & robot_pos_amt, Point & vector)
@@ -323,7 +331,7 @@ int Engine2::scan()
    }
 }
 
-// fucking broken!!
+// fucking broken!! 
 std::vector<WSObject>::iterator Engine2::get_closest_object()
 {
    typedef std::vector<WSObject>::iterator Iterator;
@@ -380,6 +388,7 @@ bool Engine2::pickup(std::vector<WSObject>::iterator obj)
       return false;
    } else {
       moveTo(obj_position);
+      position_valid = false;
    }
    return true;
 }
@@ -398,7 +407,9 @@ void Engine2::load_raw(ClusterCloud & cc)
 
 void Engine2::moveTo(RobotPosition & position)
 {
-   m_robot->moveTo(position, 0.75);
+   m_robot->moveTo(position, 0.5);
+   position_valid = false;
+   // TODO could emit something for Qt... but how (since this isn't a Q_OBJECT)
 }
 
 void Engine2::filter_floor(ClusterCloud & cc) 
@@ -474,6 +485,8 @@ Engine2::Engine2(pcl::visualization::PCLVisualizer::Ptr vis,
    m_logger(logger)
    
 {
+   position_valid = false;
+
    m_got_floor_plane = false;
 
    m_objects = new std::vector<WSObject>();
@@ -596,7 +609,7 @@ Engine2::setup_claw_line(int viewport)
    viewer->removeShape("OriginLine", viewport);
    viewer->addLine(origin_, origin_proj_, "OriginLine", viewport);
 
-   move_claw_line(0.0, 0.0, viewport);
+   move_claw_line(m_cal.x_adj_amt, m_cal.y_adj_amt, 0);
 
 }
 

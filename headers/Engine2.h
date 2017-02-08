@@ -49,6 +49,9 @@ public:
    Point                            origin_;
    Point                            origin_proj_;
 
+   RobotPosition                    currentPosition;
+   bool                             position_valid;
+
 
 public:
 
@@ -70,6 +73,15 @@ public:
       state_t  state;
       char     mask;
    }  ustate_t;
+
+   typedef enum {
+      X,
+      Y,
+      Z,
+      J4,
+      J5,
+      J6
+   } direction_t;
 
 // const int CLOSEST_OBJECT = 40;
 // const int DEFAULT_OBJECT = 50;
