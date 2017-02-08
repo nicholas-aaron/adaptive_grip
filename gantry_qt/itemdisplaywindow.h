@@ -1,9 +1,9 @@
 #ifndef ITEMDISPLAYWINDOW_H
 #define ITEMDISPLAYWINDOW_H
 
-#include <QWidget>
-#include <QPainter>
-#include <QPen>
+#include <QtWidgets/QWidget>
+#include <QtGui/QPainter>
+#include <QtGui/QPen>
 #include <QtDesigner/QtDesigner>
 #include "WSObject.h"
 

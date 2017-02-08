@@ -1,9 +1,10 @@
 #ifndef ENGTHREAD__H
 #define ENGTHREAD__H
 
-#include <QtGui>
+//#include <QtGui>
 #include "Engine2.h"
 #include <iostream>
+#include <QtCore/QThread>
 
 class EngThread : public QThread
 {

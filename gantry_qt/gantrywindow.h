@@ -1,7 +1,7 @@
 #ifndef GANTRYWINDOW_H
 #define GANTRYWINDOW_H
 
-#include <QMainWindow>
+#include <QtWidgets/QMainWindow>
 
 #include "Engine2.h"
 #include "Engine3.h"
@@ -48,10 +48,10 @@ public:
 
 private:
     Ui::GantryWindow *ui;
-    void update_display();
 
 public slots:
 
+ 	void update_display();
    void home();
    void load_calibration();
    void move_to_location();

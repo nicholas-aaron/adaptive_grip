@@ -30,11 +30,11 @@ GantryWindow::GantryWindow(QWidget *parent) :
     ui->setupUi(this);
 
     m_logger = new QLogger(ui->statusDisplay);
-//  eng = new Engine3(viewer, m_logger); 
-//  eng = new Engine2(viewer, m_logger);
+//eng = new Engine3(viewer, m_logger);
+  eng = new Engine2(viewer, m_logger);
     ui->itemDisplay->m_objects = eng->m_objects;
 
-   live_viewer = new LiveViewer(ui->qvtkWidgetLive, viewer, eng->vp_calibration_axes);
+ //  live_viewer = new LiveViewer(ui->qvtkWidgetLive, viewer, eng->vp_calibration_axes);
     ui->qvtkWidget->SetRenderWindow(viewer->getRenderWindow());
     viewer->setupInteractor(ui->qvtkWidget->GetInteractor(), ui->qvtkWidget->GetRenderWindow());
     ui->qvtkWidget->update();
@@ -46,7 +46,7 @@ GantryWindow::GantryWindow(QWidget *parent) :
     CHECKED_CONNECT(ui->loadCalButton, SIGNAL(pressed()), this, SLOT(load_calibration()));
     CHECKED_CONNECT(ui->moveButton, SIGNAL(pressed()), this, SLOT(move_to_location()));
     CHECKED_CONNECT(ui->scanButton, SIGNAL(pressed()), this, SLOT(find_objects()));
-    CHECKED_CONNECT(ui->positionButton, SIGNAL(pressed()), this, SLOT(update_position()));
+    CHECKED_CONNECT(ui->positionButton, SIGNAL(pressed()), this, SLOT(update_display()));
     CHECKED_CONNECT(ui->prevItemButton, SIGNAL(pressed()), ui->itemDisplay, SLOT(cycle()));
     CHECKED_CONNECT(ui->nextItemButton, SIGNAL(pressed()), ui->itemDisplay, SLOT(cycle()));
     CHECKED_CONNECT(ui->centerItemButton, SIGNAL(pressed()), this, SLOT(center_item()));
@@ -58,35 +58,36 @@ GantryWindow::GantryWindow(QWidget *parent) :
 
     ui->cal_y_spin->setMinimum(-100.0);
     ui->cal_x_spin->setMinimum(-100.0);
-
+	
+  
     // Signal-mapping the slots for the "move" "here" buttons
     QSignalMapper * buttonMapper = new QSignalMapper(this);
-    buttonMapper->setMapping(decreasexButton, DECREASE_X);
-    buttonMapper->setMapping(decreaseyButton, DECREASE_Y);
-    buttonMapper->setMapping(decreasezButton, DECREASE_Z);
-    buttonMapper->setMapping(decreasej4Button, DECREASE_J4);
-    buttonMapper->setMapping(decreasej5Button, DECREASE_J5);
-    buttonMapper->setMapping(decreasej6Button, DECREASE_J6);
-    buttonMapper->setMapping(increasexButton, INCREASE_X);
-    buttonMapper->setMapping(increaseyButton, INCREASE_Y);
-    buttonMapper->setMapping(increasezButton, INCREASE_Z);
-    buttonMapper->setMapping(increasej4Button, INCREASE_J4);
-    buttonMapper->setMapping(increasej5Button, INCREASE_J5);
-    buttonMapper->setMapping(increasej6Button, INCREASE_J6);
-    CHECKED_CONNECT(decreasexButton, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(decreaseyButton, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(decreasezButton, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(decreasej4Button, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(decreasej5Button, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(decreasej6Button, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(increasexButton, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(increaseyButton, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(increasezButton, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(increasej4Button, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(increasej5Button, SIGNAL(pressed()), signalMapper, SLOT(map()));
-    CHECKED_CONNECT(increasej6Button, SIGNAL(pressed()), signalMapper, SLOT(map()));
+    buttonMapper->setMapping(ui->decreaseXButton, DECREASE_X);
+    buttonMapper->setMapping(ui->decreaseYButton, DECREASE_Y);
+    buttonMapper->setMapping(ui->decreaseZButton, DECREASE_Z);
+    buttonMapper->setMapping(ui->decreasej4Button, DECREASE_J4);
+    buttonMapper->setMapping(ui->decreasej5Button, DECREASE_J5);
+    buttonMapper->setMapping(ui->decreasej6Button, DECREASE_J6);
+    buttonMapper->setMapping(ui->increaseXButton, INCREASE_X);
+    buttonMapper->setMapping(ui->increaseYButton, INCREASE_Y);
+    buttonMapper->setMapping(ui->increaseZButton, INCREASE_Z);
+    buttonMapper->setMapping(ui->increasej4Button, INCREASE_J4);
+    buttonMapper->setMapping(ui->increasej5Button, INCREASE_J5);
+    buttonMapper->setMapping(ui->increasej6Button, INCREASE_J6);
+    CHECKED_CONNECT(ui->decreaseXButton, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->decreaseYButton, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->decreaseZButton, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->decreasej4Button, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->decreasej5Button, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->decreasej6Button, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->increaseXButton, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->increaseYButton, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->increaseZButton, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->increasej4Button, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->increasej5Button, SIGNAL(pressed()), buttonMapper, SLOT(map()));
+    CHECKED_CONNECT(ui->increasej6Button, SIGNAL(pressed()), buttonMapper, SLOT(map()));
     QObject::connect(buttonMapper, SIGNAL(mapped(int)), this, SLOT(manualMove(int)));
-    
+        
     // Thread
     et = new EngThread(eng, eng->m_robot->currentPos());
     QObject::connect(et, SIGNAL(finished()), et, SLOT(quit()));
@@ -115,7 +116,7 @@ void
 GantryWindow::load_calibration()
 {
    eng->load();
-   RobotPosition new_pos = eng->m_robot->currentPos();
+// RobotPosition new_pos = eng->m_robot->currentPos();
    update_display();
 }
 
@@ -161,10 +162,10 @@ GantryWindow::move_to_location()
 // eng->m_robot->moveTo(new_pos);
   
 // Need to be updating the other view in another thread
-// eng->moveTo(new_pos);
+ eng->moveTo(new_pos);
 
-   et->setPos(new_pos);
-   et->start();
+  // et->setPos(new_pos);
+  // et->start();
 
 // std::string reply;
 // eng->m_robot->controller >> reply;
@@ -196,11 +197,12 @@ void GantryWindow::update_position()
    ui->j6_pte->setPlainText(QString::number(curr.j6));
 
    ui->itemDisplay->update_robot_position(curr);
-   update_display();
+// update_display();
 }
 
 void GantryWindow::update_display()
 {
+	update_position();
    ui->itemDisplay->update();
 }
 
@@ -238,11 +240,33 @@ void GantryWindow::manualMove(int direction)
    bool decreasing = (direction >= 100);
    bool angles     = ((direction % 100) > 3);
 
-   if (direction % 100 == 1) {
+	const float degree_mm = 50.0;
+	const float angle_deg = 10.0;
 
+	float increment;
+	if (angles) {
+		increment = angle_deg;
+	} else {
+		increment = degree_mm;
+	}
+
+	if (decreasing) {
+		direction = direction * -1.0;
+	} 
+
+	RobotPosition newPosition = eng->getPosition();
+
+   if (direction % 100 == 1) {
+		newPosition.x += increment;
    } else if (direction % 100 == 2) {
+		newPosition.y += increment;
    } else if (direction % 100 == 3) {
+		newPosition.z += increment;
    } else if (direction % 100 == 4) {
+		newPosition.j4 += increment;
    } else if (direction % 100 == 5) {
+		newPosition.j5 += increment;
    } else if (direction % 100 == 6) {
+		newPosition.j6 += increment;
+   }
 }

@@ -1,9 +1,9 @@
 #ifndef LIVEUPDATETHREAD__H
 #define LIVEUPDATETHREAD__H
 
-#include <QtGui>
+//#include <QtGui>
 #include <QVTKWidget.h>
-#include "LiveViewer.h"
+#include "liveviewer.h"
 
 class LiveUpdateThread : public QThread
 {

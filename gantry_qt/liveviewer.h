@@ -6,8 +6,8 @@
 #include <pcl/common/common_headers.h>
 #include "Mutex.h"
 #include "inst/pcl_visualizer.h"
-#include <QWidget>
-#include <QTimer>
+#include <QtWidgets/QWidget>
+#include <QtCore/QTimer>
 #include <QVTKWidget.h>
 
 class LiveViewer : QObject {

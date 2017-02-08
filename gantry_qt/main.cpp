@@ -1,5 +1,5 @@
 #include <iostream>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include "mainwindow.h"
 //#include "pclviewer2.h"
 //#include "calibrationwindow.h"

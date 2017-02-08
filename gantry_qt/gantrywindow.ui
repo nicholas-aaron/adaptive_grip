@@ -33,7 +33,7 @@
       <x>10</x>
       <y>280</y>
       <width>171</width>
-      <height>231</height>
+      <height>245</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -77,7 +77,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QVTKWidget" name="qvtkWidget">
+   <widget class="QVTKWidget" name="qvtkWidget" native="true">
     <property name="geometry">
      <rect>
       <x>480</x>
@@ -302,10 +302,10 @@
    <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>940</x>
       <y>40</y>
-      <width>141</width>
-      <height>181</height>
+      <width>151</width>
+      <height>221</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -332,10 +332,10 @@
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>669</x>
+      <x>660</x>
       <y>160</y>
       <width>161</width>
-      <height>91</height>
+      <height>101</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
@@ -517,30 +517,6 @@
      </item>
     </layout>
    </widget>
-   <zorder>itemDisplay</zorder>
-   <zorder>verticalLayoutWidget</zorder>
-   <zorder>qvtkWidget</zorder>
-   <zorder>statusDisplay</zorder>
-   <zorder>verticalLayoutWidget_3</zorder>
-   <zorder>verticalLayoutWidget_4</zorder>
-   <zorder>verticalLayoutWidget_5</zorder>
-   <zorder>increaseYButton</zorder>
-   <zorder>decreaseYButton</zorder>
-   <zorder>decreaseXButton</zorder>
-   <zorder>increaseXButton</zorder>
-   <zorder>prevItemButton</zorder>
-   <zorder>increaseZButton</zorder>
-   <zorder>decreaseZButton</zorder>
-   <zorder>verticalLayoutWidget_6</zorder>
-   <zorder>verticalLayoutWidget_2</zorder>
-   <zorder>gridLayoutWidget</zorder>
-   <zorder>plainTextEdit_4</zorder>
-   <zorder>plainTextEdit_5</zorder>
-   <zorder>plainTextEdit_6</zorder>
-   <zorder>dial_2</zorder>
-   <zorder>plainTextEdit_7</zorder>
-   <zorder>plainTextEdit_8</zorder>
-   <zorder>verticalLayoutWidget_7</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -548,7 +524,7 @@
      <x>0</x>
      <y>0</y>
      <width>1440</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuELEC_490_Group_19_Gantry_Control">
