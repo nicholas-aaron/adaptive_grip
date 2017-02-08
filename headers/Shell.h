@@ -13,7 +13,7 @@
 #include <boost/function.hpp>
 #include <boost/thread/thread.hpp>
 #include "stringmanip.h"
-#include "mutex.h"
+#include "Mutex.h"
 #include <string>
 #include <vector>
 #include <iostream>

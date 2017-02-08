@@ -49,13 +49,13 @@ template bool
 pcl::visualization::PCLVisualizer::updatePointCloud<pcl::PointXYZRGBA> (const typename pcl::PointCloud<PointXYZRGBA>::ConstPtr &cloud,
                                                      const std::string &id);
 
-template bool pcl::visualization::PCLVisualizer::updatePointCloud<pcl::PointXYZRGBA>(pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr const&, pcl::visualization::PointCloudColorHandler<pcl::PointXYZRGBA> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&);
-template bool pcl::visualization::PCLVisualizer::updatePointCloud<pcl::PointXYZ>(pcl::PointCloud<pcl::PointXYZ>::ConstPtr const&, pcl::visualization::PointCloudColorHandler<pcl::PointXYZ> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&);
+template bool pcl::visualization::PCLVisualizer::updatePointCloud<pcl::PointXYZRGBA>(pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr const&, pcl::visualization::PointCloudColorHandler<pcl::PointXYZRGBA> const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&);
+template bool pcl::visualization::PCLVisualizer::updatePointCloud<pcl::PointXYZ>(pcl::PointCloud<pcl::PointXYZ>::ConstPtr const&, pcl::visualization::PointCloudColorHandler<pcl::PointXYZ> const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&);
 
-template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZRGBA, pcl::PointXYZRGBA>(pcl::PointXYZRGBA const&, pcl::PointXYZRGBA const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int);
-template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZ, pcl::PointXYZ>(pcl::PointXYZ const&, pcl::PointXYZ const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int);
+template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZRGBA, pcl::PointXYZRGBA>(pcl::PointXYZRGBA const&, pcl::PointXYZRGBA const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int);
+template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZ, pcl::PointXYZ>(pcl::PointXYZ const&, pcl::PointXYZ const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int);
 
-template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZRGBA, pcl::PointXYZRGBA>(pcl::PointXYZRGBA const&, pcl::PointXYZRGBA const&, double, double, double, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int);
-template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZ, pcl::PointXYZ>(pcl::PointXYZ const&, pcl::PointXYZ const&, double, double, double, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int);
+template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZRGBA, pcl::PointXYZRGBA>(pcl::PointXYZRGBA const&, pcl::PointXYZRGBA const&, double, double, double, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int);
+template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZ, pcl::PointXYZ>(pcl::PointXYZ const&, pcl::PointXYZ const&, double, double, double, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int);
 
-template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZRGBA, pcl::PointXYZ>(pcl::PointXYZRGBA const&, pcl::PointXYZ const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int);
+template bool pcl::visualization::PCLVisualizer::addLine<pcl::PointXYZRGBA, pcl::PointXYZ>(pcl::PointXYZRGBA const&, pcl::PointXYZ const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int);

@@ -15,6 +15,11 @@
  *
  */
 
+ #define RCV_LAB
+ #ifdef RCV_LAB
+	#include <pcl/filters/plane_clipper3D.h>
+ #else
+
 /*
  * Software License Agreement (BSD License)
  *
@@ -124,3 +129,4 @@ namespace pcl
 
 #endif // PCL_PLANE_CLIPPER3D_H_
 
+#endif // RCV_LAB
