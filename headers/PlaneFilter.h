@@ -26,8 +26,6 @@
 #include "common_defs.h"
 #include "Mutex.h"
 
-// Points 0.05 (5cm) above the floor and closer are removed, by default.
-#define DEFAULT_FLOOR_HEIGHT 0.10 // Better than 0.05. Gets rid of wood on the floor too.
 
 
 template <typename PointT> class PlaneFilter {

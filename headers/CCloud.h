@@ -32,14 +32,14 @@ public:
          return initialized ? clusters->size() : -1;
       }
 
-      inline std::vector<Point>::iterator begin() // convenience
+      inline PointCloud::iterator begin() // convenience
       {
-         return clusters->begin();
+         return clusters->points.begin();
       }
 
-      inline std::vector<Point>::iterator end() // convenience
+      inline PointCloud::iterator end() // convenience
       {
-         return clusters->end();
+         return clusters->points.end();
       }
 
          ClusterFinder<Point> * cf;

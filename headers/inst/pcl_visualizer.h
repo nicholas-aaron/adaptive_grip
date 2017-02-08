@@ -15,6 +15,10 @@
  *
  */
 
+#define RCV_LAB
+#ifdef RCV_LAB
+	#include <pcl/visualization/pcl_visualizer.h>
+#else
 
 
 /*
@@ -2282,4 +2286,4 @@ namespace pcl
 
 #endif
 
-
+#endif // IFDEF RCV_LAB

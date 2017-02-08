@@ -78,9 +78,9 @@ class TestEngineShell : public Shell {
 
    void display_all_objects(arg_list args)
    {
-      typedef std::vector<Engine2::WSObject>::iterator Iterator;
+      typedef std::vector<WSObject>::iterator Iterator;
       printf("%-10s | %-10s | %-10s | %-10s\n", "ID", "X", "Y", "Obs");
-      for (Iterator i = eng.m_objects.begin(); i != eng.m_objects.end(); i++)
+      for (Iterator i = eng.m_objects->begin(); i != eng.m_objects->end(); i++)
       {
          printf("%10d | %-+10.2f | %-+10.2f | %-+10.2f\n", (*i).id, (*i).x_position, (*i).y_position, (*i).observation_distance);
       }

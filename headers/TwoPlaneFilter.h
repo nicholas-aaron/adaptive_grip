@@ -13,8 +13,6 @@
 #include "PlaneFilter.h"
 #include <pcl/common/centroid.h>
 
-// Empirically tested
-#define DEFAULT_PLANE_SEPARATION 0.1
 
 template <typename PointT> class TwoPlaneFilter : public PlaneFilter<PointT> {
 

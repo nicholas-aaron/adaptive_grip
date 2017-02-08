@@ -15,44 +15,150 @@ public:
          Logger * _logger) : Engine2(_vis, _logger) {
       plotter = NULL;   }
 
-   PointCloud::Ptr closest_cluster;
+   PointCloud::Ptr closest_cluster_cloud;
    double          claw_angle;
 
    int scan()
    {
       Engine2::scan();
 
-      closest_cluster.reset(new PointCloud());
-      
-      // TODO this will break any of the "center" or "move to" methods
-      // Colour the closest cluster. Will be at the same index as the 'centroid'
-      const std::vector<WSObject>::iterator closest = get_closest_object();
+   // return get_approach();
 
-      // TODO THIS WILL ONLY BE TRUE FOR THE FIRST SCAN.
-      int cluster_index = std::distance(m_objects->begin(), closest);
+   // closest_cluster_cloud.reset(new PointCloud());
+   // 
+   // // TODO this will break any of the "center" or "move to" methods
+   // // Colour the closest cluster. Will be at the same index as the 'centroid'
+   // const std::vector<WSObject>::iterator closest = get_closest_object();
+
+   // // TODO THIS WILL ONLY BE TRUE FOR THE FIRST SCAN. THE INDEX IN CLUSTERS WILL
+   // // BE DIFFERENT THAN THE INDEX IN "OBJECTS"
+   // int cluster_index = std::distance(m_objects->begin(), closest);
+   // {
+   //    stringstream msg;
+   //    msg << "Engine3(): current_view.cf->m_clusters.size() = " << current_view.cf->m_clusters.size() << endl;
+   //    msg << "closest_index = " << cluster_index << endl;
+   //    msg << "Engine3()::scan - size of closest cluster = " << current_view.cf->m_clusters[cluster_index].indices.size();
+   //    std::cout  << msg.str() << endl;
+   //    m_logger->log(msg);
+   // }
+
+
+   // typedef std::vector<int>::const_iterator IndicesIt;
+   // for (IndicesIt it = current_view.cf->m_clusters[cluster_index].indices.begin();
+   //       it != current_view.cf->m_clusters[cluster_index].indices.end(); ++it)
+   // {
+   //    // copy these indices of current_view
+   //    closest_cluster_cloud->push_back((*current_view.cloud)[*it]);
+   // }
+
+   // add_cloud_to_viewer(closest_cluster_cloud, "ClosestCluster", vp_calibration_axes, 255, 0, 0);
+
+   // // Now, we have the entire cluster, and its 
+      
+   // create_surface_map(closest_cluster_cloud, (*current_view.clusters)[cluster_index]);
+
+   }
+
+   int move_to_object(int index)
+   {
+      m_logger->log("Entering Engine3::move_to_object()");
+
+      // TODO move this-------------------------------
+      // Check if the index is valid
+      if (index < 0 || index >= m_objects->size()) {
+         std::stringstream emsg;
+         emsg << "Engine3::move_to_object() - Illegal index (" << index << ") provided. m_objects->size() = "
+            << m_objects->size() << ".";
+         m_logger->log(emsg);
+         return FAILURE;
+      }
+      std::vector<WSObject>::iterator object=m_objects->begin();
+      std::advance(object, index);
+      // TODO move this-------------------------------
+      
+      // Move to our vantage point
+      vantage_point(object);
+
+      float pickup_angle, object_height;
+
+      get_approach(object, pickup_angle, object_height);
+
+//    pickup(object);
+   }
+
+   int get_approach(std::vector<WSObject>::iterator object, float & angle, float & height)
+   {
+      typedef std::vector<WSObject>::iterator   ObjectIterator;
+  //  typedef pcl::PointCloud<Point>::iterator  PointIterator;
+      typedef std::vector<Point>::iterator  PointIterator;
+      
+
+      // Get the object we want before we re-scan.
+//    ObjectIterator object =           get_closest_object();
+      PointIterator  closest_object_centroid;
+      const RobotPosition  currentPos = getPosition();
+
+      // Re-scan.
+      Engine2::scan();
+
+      // Go through the clusters in the current view, and find the one that's closest
+      // to the object we are trying to approach.
+      float shortest_xy_dist = -1;
+      RobotPosition calculatedPosition = currentPos;
+      for (PointIterator point = current_view.cf->m_centroids.begin(); point != current_view.cf->m_centroids.end(); ++point)
       {
-         stringstream msg;
-         msg << "Engine3(): current_view.cf->m_clusters.size() = " << current_view.cf->m_clusters.size() << endl;
-         msg << "closest_index = " << cluster_index << endl;
-         msg << "Engine3()::scan - size of closest cluster = " << current_view.cf->m_clusters[cluster_index].indices.size();
-         std::cout  << msg.str() << endl;
-         m_logger->log(msg);
+         calculatedPosition = currentPos;
+         calculate_robot_position(*point, calculatedPosition);
+
+         float x_delta = calculatedPosition.x - object->x_position;
+         float y_delta = calculatedPosition.y - object->y_position;
+         float distance = sqrt(x_delta * x_delta + y_delta * y_delta);
+
+         if (shortest_xy_dist < 0 || distance < shortest_xy_dist)
+         {
+            shortest_xy_dist = distance;
+            closest_object_centroid = point;
+         }
       }
 
+   // {
+   //    std::stringstream msg;
+   //    msg << "The WSObject is at (" << object->x_position << ", " << object->y_position << endl;
+   //    msg << "The Closest Cluster is at (" << calculatedPosition.x << ", " << calculatedPosition.y;
+   //    m_logger->log(msg);
+   // }
+
+      // Now, get the index of the cloud in the "CCloud" current_view
+      int cluster_index = std::distance(current_view.cf->m_centroids.begin(), closest_object_centroid);
+
+   // stringstream msg;
+   // msg << "get_approach(): cluster_index = " << cluster_index << endl;
+   // msg << "current_view.clusters->size() = " << current_view.clusters->size() << endl;
+   // msg << "current_view.cf->m_clusters.size() = " << current_view.cf->m_clusters.size();
+   // msg << "current_view.cf->m_centroids.size() = " << current_view.cf->m_centroids.size();
+   // m_logger->log(msg);
 
       typedef std::vector<int>::const_iterator IndicesIt;
-      for (IndicesIt it = current_view.cf->m_clusters[cluster_index].indices.begin();
-            it != current_view.cf->m_clusters[cluster_index].indices.end(); ++it)
+      std::vector<int> & points_vector = current_view.cf->m_clusters[cluster_index].indices; // save typing
+
+      closest_cluster_cloud.reset(new PointCloud());
+      for (IndicesIt point = points_vector.begin(); point != points_vector.end(); point++)
       {
-         // copy these indices of current_view
-         closest_cluster->push_back((*current_view.cloud)[*it]);
+         closest_cluster_cloud->push_back((*current_view.cloud)[*point]);
       }
+      add_cloud_to_viewer(closest_cluster_cloud, "ClosestCluster", vp_calibration_axes, 255, 0, 0);
 
-      add_cloud_to_viewer(closest_cluster, "ClosestCluster", vp_calibration_axes, 255, 0, 0);
+      // for now, return the height from the floor plane
+      Cluster<Point> clusterPoint(*closest_object_centroid);
+      height = std::fabs(clusterPoint.get_distance_to_plane(m_floor_plane)) + DEFAULT_FLOOR_HEIGHT;
 
-      // Now, we have the entire cluster, and its 
+      {
+         stringstream msg;
+         msg << "get_approach(): Calculated a height of " << height;
+         m_logger->log(msg);
+      }
       
-   // create_surface_map(closest_cluster, (*current_view.clusters)[cluster_index]);
+//    return 0;
 
    }
 
