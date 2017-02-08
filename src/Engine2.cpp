@@ -482,9 +482,9 @@ bool Engine2::add_objects(ClusterCloud & cloud)
 {
    RobotPosition currentPos = getPosition();
 
-   typedef     std::vector<Point>::iterator  Iterator;
+   typedef     PointCloud::iterator  Iterator;
 
-   std::vector<Point>::iterator closest_cluster;
+   Iterator closest_cluster;
 
    float       shortest_distance = -1.0;
 
