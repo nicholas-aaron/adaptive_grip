@@ -1,4 +1,5 @@
 
+// Pin defs
 #define STP 2 // All motor steps are tied together
 #define DIR_1 3 // Each motor has its own direction pin
 #define DIR_2 4
@@ -14,11 +15,20 @@ char userInput;
 boolean firstRun = true;
 
 //Arrays
-int motors[ARRAY_SIZE] = {1,2,3,4,5,6}; //rotate motor or vibrate in place
-boolean directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
-int positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
-int limits[ARRAY_SIZE] = {700,700,700,600,600,600};
-int curlLimits[ARRAY_SIZE] = {400,400,400,50,50,50};
+int 		motors[ARRAY_SIZE] = {1,2,3,4,5,6}; //rotate motor or vibrate in place
+
+// True = open
+// False = close
+const boolean 	directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
+
+// Counter to remember how many steps each motor's moved
+int 		positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
+
+// Bounds of the steps - 0 is the lower limit for all
+int 		limits[ARRAY_SIZE] = {700,700,700,600,600,600};
+
+// "Curl Limits"
+int 		curlLimits[ARRAY_SIZE] = {400,400,400,50,50,50};
 
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);
@@ -29,8 +39,7 @@ void setup() { //--------------------------------------------------- SETUP -----
   pinMode(DIR_5,OUTPUT);
   pinMode(DIR_6,OUTPUT);
   pinMode(EN,OUTPUT);
-  setPins();
-
+  setPins(); 
   Serial.begin(9600); 
   displayMenu();
 }
@@ -48,9 +57,11 @@ void loop() { // ------------------------------------------------------- MAIN LO
       displayMenu();
     }
     else{
+
       zeroIntArray(motors,ARRAY_SIZE);
       userMotorChoice(userInput, motors, directions); // Sets new motors array and directions array
       driveMotor(motors, 5, directions, positions, ARRAY_SIZE);
+
       //debugging
 //      for(int i = 0; i < 6; i++){
 //        Serial.print("Position of motor ");

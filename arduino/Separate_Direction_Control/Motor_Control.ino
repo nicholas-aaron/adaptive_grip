@@ -24,6 +24,7 @@ void driveMotor(int (*motors), int degRotation, boolean directions[], int (*posi
       dirSwitch = !dirSwitch;
     }
 
+		// Overwrite directions
     selectMotor(motors, directions, positions);
     delay(2);
     digitalWrite(STP, HIGH);
@@ -94,6 +95,8 @@ void setPins()
   digitalWrite(DIR_6, LOW);
 }
 
+// Vibrates everthing
+// Watch delays
 void holdPosition(int mSecs)
 {
   for (int x = 0; x < (int)(mSecs / 8); x ++)
