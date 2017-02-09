@@ -56,6 +56,8 @@ GantryWindow::GantryWindow(QWidget *parent) :
     CHECKED_CONNECT(ui->startLiveButton, SIGNAL(pressed()), this, SLOT(startLiveFeed()));
     CHECKED_CONNECT(ui->stopLiveButton, SIGNAL(pressed()), this, SLOT(stopLiveFeed()));
 
+    CHECKED_CONNECT(ui->arduinoButton, SIGNAL(pressed()), this, SLOT(sendSerial()));
+
     ui->cal_y_spin->setMinimum(-100.0);
     ui->cal_x_spin->setMinimum(-100.0);
 	
@@ -91,6 +93,8 @@ GantryWindow::GantryWindow(QWidget *parent) :
     // Thread
     et = new EngThread(eng, eng->m_robot->currentPos());
     QObject::connect(et, SIGNAL(finished()), et, SLOT(quit()));
+
+	 clawduino = new Clawduino(m_logger, "/dev/ttyUSB1");
 }
 
 void GantryWindow::startLiveFeed() { 
@@ -101,8 +105,11 @@ void GantryWindow::stopLiveFeed() { live_viewer->stop(); }
 void
 GantryWindow::home()
 {
-   eng->m_robot->runCmd("RUN HOME5");
-   update_display();
+//   eng->m_robot->runCmd("RUN HOME5");
+//  update_display();
+    m_logger->log("The old \"HOME5\" has been deprecated because it puts the claw at risk.");
+    m_logger->log("Returning.");
+
 }
 
 void 
@@ -189,12 +196,12 @@ void GantryWindow::update_position()
 {
    const RobotPosition curr = eng->getPosition();
 
-   ui->x_pte->setPlainText(QString::number(curr.x));
-   ui->y_pte->setPlainText(QString::number(curr.y));
-   ui->z_pte->setPlainText(QString::number(curr.z));
-   ui->j4_pte->setPlainText(QString::number(curr.j4));
-   ui->j5_pte->setPlainText(QString::number(curr.j5));
-   ui->j6_pte->setPlainText(QString::number(curr.j6));
+   ui->x_pte->setPlainText(QString("x : ") + QString::number(curr.x));
+   ui->y_pte->setPlainText(QString("y : ") + QString::number(curr.y));
+   ui->z_pte->setPlainText(QString("z : ") + QString::number(curr.z));
+   ui->j4_pte->setPlainText(QString("J4: ") + QString::number(curr.j4));
+   ui->j5_pte->setPlainText(QString("J5: ") + QString::number(curr.j5));
+   ui->j6_pte->setPlainText(QString("J6: ") + QString::number(curr.j6));
 
    ui->itemDisplay->update_robot_position(curr);
 // update_display();
@@ -269,4 +276,10 @@ void GantryWindow::manualMove(int direction)
    } else if (direction % 100 == 6) {
 		newPosition.j6 += increment;
    }
+}
+
+void GantryWindow::sendSerial()
+{
+	string output;
+	clawduino->send_message("x", output);
 }

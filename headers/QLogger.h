@@ -3,8 +3,8 @@
 
 #include "Logger.h"
 
-   #include <QString> // TODO figure out include_dirs for cmake
-   #include <QTextEdit> // TODO figure out include_dirs for cmake
+   #include <QtCore/QString> // TODO figure out include_dirs for cmake
+   #include <QtWidgets/QTextEdit> // TODO figure out include_dirs for cmake
 
 class QLogger : public Logger {
 

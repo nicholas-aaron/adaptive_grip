@@ -16,11 +16,6 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 add_library(Utils 
    RobotExt.cpp stringmanip.cpp Logger.cpp  Engine.cpp PlaneFilter.cpp TwoPlaneFilter.cpp Camera.cpp 
    CameraFile.cpp PCLUtils.cpp ClusterFinder.cpp WSObject.cpp plane_clipper_3D.cpp pcl_visualizer_instantiations.cpp
-   Calibration.cpp Engine2.cpp QLogger.cpp)
-
-#qt5_use_modules(Utils Widgets)
-
-
+   Calibration.cpp Engine2.cpp QLogger.cpp Clawduino.cpp)
 
 target_link_libraries(Utils)
-

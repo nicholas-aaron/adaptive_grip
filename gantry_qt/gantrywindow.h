@@ -9,7 +9,7 @@
 #include "inst/pcl_visualizer.h"
 #include "QLogger.h"
 #include "RobotPosition.h"
-
+#include "Clawduino.h"
 #include "engthread.h"
 #include "liveviewer.h"
 #include "liveupdatethread.h"
@@ -43,6 +43,9 @@ public:
 //  pcl::visualization::PCLVisualizer::Ptr       live_viewer;
     LiveViewer * live_viewer;
 
+ 	// TODO FOR NOW TODO 
+	Clawduino * clawduino;
+ 	// TODO FOR NOW TODO 
 
     float      current_x_cal, current_y_cal; // TODO move
 
@@ -64,6 +67,7 @@ public slots:
    void startLiveFeed();
    void stopLiveFeed();
    void manualMove(int);
+   void sendSerial();
 };
 
 #endif // GANTRYWINDOW_H

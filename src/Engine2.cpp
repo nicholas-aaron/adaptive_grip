@@ -74,6 +74,7 @@ int Engine2::add_object(Point point, bool closest)
    }
 
    if (new_obj) {
+
       m_objects->push_back(*update_object);
       delete new_obj;
    }
@@ -132,19 +133,24 @@ bool Engine2::calculate_robot_position(const Point & position, RobotPosition & n
    float x_amt = PCLUtils::dot_double_normalize(vector_along_floor, m_cal.x_vector);
    float y_amt = PCLUtils::dot_double_normalize(vector_along_floor, m_cal.y_vector);
 
+// new_pos.x += (-1.0 * x_amt * m_cal.x_rpos_amt);
+// new_pos.y += (-1.0 * y_amt * m_cal.y_rpos_amt);
+
+   // what the fuck??? why did I have to change the magnitude of new_pos.y???
+   // everything went to shit when I started running this code on the lab machine,
+   // but it was working with the opposite magnitude (e.g. above on my mac)
    new_pos.x += (-1.0 * x_amt * m_cal.x_rpos_amt);
-   new_pos.y += (-1.0 * y_amt * m_cal.y_rpos_amt);
+   new_pos.y += ( 1.0 * y_amt * m_cal.y_rpos_amt);
 
    /*
     * Calculate its "Z" value. Get its distance from the plane.
     */
 
    Cluster<Point> point_cluster(position);
-   float distance_to_plane = point_cluster.get_distance_to_plane(m_floor_plane);
-
+   float distance_to_plane = fabs(point_cluster.get_distance_to_plane(m_floor_plane));
    {
       std::stringstream msg;
-      msg << "Calculated a distance-to-plane of " << distance_to_plane << ".";
+      msg << "Calculated a distance-to-plane of " << (distance_to_plane + DEFAULT_FLOOR_HEIGHT)  << ".";
       m_logger->log(msg);
    }
 
@@ -294,12 +300,6 @@ int Engine2::scan()
    typedef std::vector<Point>::iterator   Iterator;
    Iterator                               closest_cluster;
 
-   // TODO CHECK THAT WE ARE CALIBRATED!
-   if (!m_state.state.x_axis_calibrated || !m_state.state.y_axis_calibrated) {
-      m_logger->log("scan() - Not calibrated. Aborting.");
-      return -1;
-   }
-
    // Get camera input
    load_raw(current_view);
 
@@ -308,6 +308,12 @@ int Engine2::scan()
 
    // Filter the floor out
    filter_floor(current_view);
+
+   // TODO CHECK THAT WE ARE CALIBRATED!
+   if (!m_state.state.x_axis_calibrated || !m_state.state.y_axis_calibrated) {
+      m_logger->log("scan() - Not calibrated. Aborting.");
+      return -1;
+   }
 
    // Find clusters
    current_view.find_clusters();
@@ -376,6 +382,7 @@ bool Engine2::vantage_point(std::vector<WSObject>::iterator object)
 
 bool Engine2::pickup(std::vector<WSObject>::iterator obj)
 {
+	m_logger->log("Entering Engine2::pickup()");
    scan();
 
    RobotPosition obj_position = getPosition();
@@ -387,6 +394,7 @@ bool Engine2::pickup(std::vector<WSObject>::iterator obj)
       moveTo(obj_position);
       position_valid = false;
    }
+	m_logger->log("Exiting Engine2::pickup()");
    return true;
 }
 
@@ -404,7 +412,8 @@ void Engine2::load_raw(ClusterCloud & cc)
 
 void Engine2::moveTo(RobotPosition & position)
 {
-   m_robot->moveTo(position, 0.5);
+// m_robot->moveTo(position, 0.5);
+   m_robot->moveTo(position, 0.15);
    position_valid = false;
    // TODO could emit something for Qt... but how (since this isn't a Q_OBJECT)
 }
@@ -482,6 +491,11 @@ Engine2::Engine2(pcl::visualization::PCLVisualizer::Ptr vis,
    m_logger(logger)
    
 {
+
+	stringstream limits;
+    limits << m_robot->currentLimits();
+	m_logger->log(limits);
+
    position_valid = false;
 
    m_got_floor_plane = false;

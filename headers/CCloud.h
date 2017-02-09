@@ -34,12 +34,14 @@ public:
 
       inline PointCloud::iterator begin() // convenience
       {
-         return clusters->points.begin();
+      // return clusters->points.begin();
+			return clusters->begin();
       }
 
       inline PointCloud::iterator end() // convenience
       {
-         return clusters->points.end();
+      // return clusters->points.end();
+			return clusters->end();
       }
 
          ClusterFinder<Point> * cf;

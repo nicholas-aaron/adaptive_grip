@@ -15,6 +15,7 @@ WSObject::WSObject(const WSObject & copy) {
 
    x_position = copy.x_position;
    y_position = copy.y_position;
+
    observation_distance = copy.observation_distance;
    id         = copy.id;
    x_obs_position = copy.x_obs_position;

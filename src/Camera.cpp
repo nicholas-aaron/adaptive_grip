@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+#define DEBUG_CAMERA
 
 template <typename PointT> 
 Camera<PointT>::Camera(CloudPtr cloud, Mutex * mutex) :
@@ -36,7 +37,7 @@ Camera<PointT>::retrieve()
 
    // Wait until the Kinect has picked up a new cloud.
    do { 
-      boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+      boost::this_thread::sleep(boost::posix_time::microseconds(200000));
    } while (!_retrieved_cloud);
 
    // Modify the cloud, and release the Mutex.
