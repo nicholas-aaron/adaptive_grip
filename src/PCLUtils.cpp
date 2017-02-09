@@ -316,3 +316,19 @@ void PCLUtils::dbWaitForEnter(std::string msg)
    std::cout << "[Press Enter to Continue]" << std::endl;
    do std::cin.get(c); while (c != Enter);
 }
+
+template <typename PointT> void PCLUtils::downsample(typename pcl::PointCloud<PointT>::Ptr	cloud, float voxelSize)
+{
+	// Debug information...
+    std::cout << "PCLUtils::downsample() - size before downsampling = " << cloud->size() << std::endl;
+
+    pcl::VoxelGrid<PointT> voxel;
+	voxel.setInputCloud(cloud);
+    voxel.setLeafSize(voxelSize, voxelSize, voxelSize);
+	voxel.filter(*cloud);
+
+    std::cout << "PCLUtils::downsample() - size after downsampling = " << cloud->size() << std::endl;
+}
+
+template void PCLUtils::downsample<pcl::PointXYZ>(pcl::PointCloud<pcl::PointXYZ>::Ptr, float);
+template void PCLUtils::downsample<pcl::PointXYZRGBA>(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr, float);

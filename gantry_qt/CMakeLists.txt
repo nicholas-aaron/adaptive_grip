@@ -41,13 +41,17 @@ add_definitions(${PCL_DEFINTIONS})
 
 qt5_wrap_ui(UIS_HDRS
     pclviewer2.ui
-    gantrywindow.ui)
+    gantrywindow.ui
+    calibrationwindow.ui)
 
 aux_source_directory(. SRC_LIST)
 
-set (SOURCES main.cpp mainwindow.cpp itemdisplaywindow.cpp gantrywindow.cpp engthread.cpp liveviewer.cpp)
-add_executable(${PROJECT_NAME} ${SOURCES} ${UIS_HDRS} mainwindow.cpp)
+set (SOURCES mainwindow.cpp itemdisplaywindow.cpp gantrywindow.cpp calibrationwindow.cpp engthread.cpp)
+add_executable(${PROJECT_NAME} main.cpp ${SOURCES} ${UIS_HDRS} mainwindow.cpp)
+add_executable(calibrate ${SOURCES} ${UIS_HDRS} calibrate.cpp)
 target_link_libraries(pcl_qt_cmake ${PCL_LIBRARIES} ${Readline_LIBRARY} ${VTK_LIBRARIES} Utils GripperBase boost_thread)
+target_link_libraries(calibrate ${PCL_LIBRARIES} ${Readline_LIBRARY} ${VTK_LIBRARIES} Utils GripperBase boost_thread)
+
 
 # qt5_use_modules(${PROJECT_NAME} Widgets)
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Widgets)

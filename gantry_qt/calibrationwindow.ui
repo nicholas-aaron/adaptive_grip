@@ -6,108 +6,73 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>617</width>
-    <height>586</height>
+    <width>486</width>
+    <height>471</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QVTKWidget" name="qvtkWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>361</width>
-      <height>311</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>20</y>
-      <width>171</width>
-      <height>381</height>
+      <x>40</x>
+      <y>240</y>
+      <width>391</width>
+      <height>171</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="calibrateButton">
-       <property name="text">
-        <string>Calibrate Robot</string>
+      <widget class="QTextEdit" name="textEdit">
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="captureSrcButton">
-       <property name="text">
-        <string>Capture Source</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="calButton">
+         <property name="text">
+          <string>CALIBRATION</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="finishedButton">
+         <property name="text">
+          <string>Finished</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QPushButton" name="captureTgtButton">
+      <widget class="QPushButton" name="homeButton">
        <property name="text">
-        <string>Capture Target</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="registerButton">
-       <property name="text">
-        <string>Register</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="moveXButton">
-       <property name="text">
-        <string>Move +X 50</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="moveYButton">
-       <property name="text">
-        <string>Move +Y 50</string>
+        <string>Home</string>
        </property>
       </widget>
      </item>
     </layout>
    </widget>
-   <widget class="QTextBrowser" name="textBrowser">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>330</y>
-      <width>361</width>
-      <height>191</height>
-     </rect>
-    </property>
-   </widget>
+   <zorder>verticalLayoutWidget</zorder>
+   <zorder>textEdit</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>617</width>
-     <height>22</height>
+     <width>486</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QVTKWidget</class>
-   <extends>QWidget</extends>
-   <header>QVTKWidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

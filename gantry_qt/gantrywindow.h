@@ -11,10 +11,12 @@
 #include "RobotPosition.h"
 #include "Clawduino.h"
 #include "engthread.h"
-#include "liveviewer.h"
-#include "liveupdatethread.h"
+//#include "liveviewer.h"
+//#include "liveupdatethread.h"
 
 #include <vtkRenderWindow.h>
+#define BUTTON_SPEED_NOT_Z_AXIS 0.6
+#define BUTTON_SPEED_Z_AXIS 0.2
 
 // TODO move this somewhere better
 // can't do Q_ASSERT(CONNECT( ... )) b/c assert expands to a no-op in release builds
@@ -41,7 +43,7 @@ public:
     Engine2 *  eng;
 
 //  pcl::visualization::PCLVisualizer::Ptr       live_viewer;
-    LiveViewer * live_viewer;
+  //  LiveViewer * live_viewer;
 
  	// TODO FOR NOW TODO 
 	Clawduino * clawduino;

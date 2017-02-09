@@ -19,6 +19,22 @@
 #include "WSObject.h"
 
 
+// How far away, from the centroid of an object, in the X direction,
+// that we should be to get the best view of it.
+#define VANTAGE_X_OFFSET 250.0
+
+// How far away, from the centroid of an object, in the Y direction,
+// that we should be to get the best view of it.
+#define VANTAGE_Y_OFFSET 0.0
+
+// Rise speed: 30% of max
+#define RISE_SPEED 0.5
+
+// X-Y/J4/J5/J6 speed: 30% of max.
+#define XY_SPEED 0.5
+
+// Descent speed: 10% of max
+#define DESCENT_SPEED 0.25
 
 
 using std::stringstream;
@@ -127,7 +143,7 @@ public:
    
    void load_raw(ClusterCloud & cc);
 
-   virtual void moveTo(RobotPosition & position);
+   virtual void moveTo(const RobotPosition & position, bool directly=false, float overrideSpeed = 0.15);
 
    void filter_floor(ClusterCloud & cc);
    
@@ -175,6 +191,8 @@ public:
 
    bool vantage_point(std::vector<WSObject>::iterator);
    virtual bool pickup(std::vector<WSObject>::iterator);
+
+	float z_ceiling;
 
 public:
    // Just in case..

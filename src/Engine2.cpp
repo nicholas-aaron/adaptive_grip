@@ -101,8 +101,9 @@ RobotPosition  Engine2::getPosition()
 
 bool Engine2::validate_limits(const RobotPosition & pos) 
 {
-   std::cout << "Implement validateLimits!!" << std::endl;
-   return true;
+	// Check if the position we're validating is within
+	// the robot's limits.
+	return m_robot->currentLimits().posWithin(pos);
 }
 
 bool Engine2::calculate_camera_position(const Point & position, RobotPosition & new_pos)
@@ -373,8 +374,8 @@ bool Engine2::vantage_point(std::vector<WSObject>::iterator object)
 
    m_logger->log("Warning: moving to a hard-coded \"vantage\" point to re-scan.");
    RobotPosition initial = getPosition();
-   initial.x = object->x_position + 150.0; // Empirically determined
-   initial.y = object->y_position;
+   initial.x = object->x_position + VANTAGE_X_OFFSET; // Empirically determined
+   initial.y = object->y_position + VANTAGE_Y_OFFSET;
    initial.z = 200.0; // pretty high
    moveTo(initial);
    return true;
@@ -406,16 +407,47 @@ void Engine2::load_raw(ClusterCloud & cc)
    *cc.cloud = *cam_cloud_;
 // pcl::copyPointCloud(*cam_cloud_, *cc.cloud);
 
+	// TODO FOR NOW TODO Test this downsampling.
+    PCLUtils::downsample<Point>(cc.cloud, 0.0075);
+
    // Don't filter it
    cc.initialized = true;
+
 }
 
-void Engine2::moveTo(RobotPosition & position)
+void Engine2::moveTo(const RobotPosition & position, bool directly, float overrideSpeed)
 {
 // m_robot->moveTo(position, 0.5);
-   m_robot->moveTo(position, 0.15);
-   position_valid = false;
+   //m_robot->moveTo(position, 0.15);
    // TODO could emit something for Qt... but how (since this isn't a Q_OBJECT)
+
+   position_valid = false;
+	if (!directly) {
+
+	float 			new_z = position.z;
+
+	
+	// Go straight up...
+	RobotPosition risePosition = getPosition();
+	risePosition.z = z_ceiling;
+	m_robot->moveTo(risePosition, RISE_SPEED);
+
+	// Move to the new X/Y/J4/J5/J6
+	RobotPosition hoverPosition = position;
+///risePosition = position;
+///risePosition.z = z_ceiling;
+///risePosition.j5 = 0.0;
+	hoverPosition.z = z_ceiling;
+	hoverPosition.j5 = 0.0;
+	m_robot->moveTo(hoverPosition, XY_SPEED);
+
+	// Move to the new Z.
+	m_robot->moveTo(position, DESCENT_SPEED);
+
+	} else {
+		m_robot->moveTo(position, overrideSpeed);
+	}
+
 }
 
 void Engine2::filter_floor(ClusterCloud & cc) 
@@ -518,6 +550,14 @@ Engine2::Engine2(pcl::visualization::PCLVisualizer::Ptr vis,
 
    viewer->createViewPort(0.0, 0.0, 1.0, 0.5, vp_calibration_axes);
    viewer->createViewPort(0.0, 0.5, 1.0, 1.0, vp_navigation);
+
+	z_ceiling = 200.0;
+	{
+		std::stringstream msg;
+		msg << "z_ceiling initially set to: " << z_ceiling;
+		m_logger->log(msg);
+	}
+
 }
 
 bool Engine2::add_objects(ClusterCloud & cloud)
@@ -609,6 +649,10 @@ Engine2::move_to_object(int index)
 
    // Re-load the point cloud
 
+	load_raw(current_view);
+	add_cloud_to_viewer(current_view.cloud, "CurrentCloud", vp_navigation);
+
+
    return SUCCESS;
 
 }
@@ -697,4 +741,3 @@ Engine2::move_claw_line(float x_amount, float y_amount, int viewport)
    viewer->removeShape("ClawLine");
    viewer->addLine(claw_base, claw_center_proj, 255, 0, 0, "ClawLine", viewport);
 }
-

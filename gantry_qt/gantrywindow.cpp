@@ -95,12 +95,20 @@ GantryWindow::GantryWindow(QWidget *parent) :
     QObject::connect(et, SIGNAL(finished()), et, SLOT(quit()));
 
 	 clawduino = new Clawduino(m_logger, "/dev/ttyUSB1");
+
+	 // Set a default "claw line"
+////#define DEFAULT_CLAW_OFFSET -0.75, -3.15
+	 m_logger->log("Setting default 'claw' offset to -0.75, -3.15.");
+    eng->move_claw_line(-0.75, -3.15, 0);
 }
 
 void GantryWindow::startLiveFeed() { 
-   live_viewer->start(); 
+   //live_viewer->start();
 }
-void GantryWindow::stopLiveFeed() { live_viewer->stop(); }
+void GantryWindow::stopLiveFeed() {
+    //live_viewer->stop();
+}
+
 
 void
 GantryWindow::home()
@@ -125,6 +133,11 @@ GantryWindow::load_calibration()
    eng->load();
 // RobotPosition new_pos = eng->m_robot->currentPos();
    update_display();
+
+
+	current_x_cal = -3.75;
+	current_y_cal = -0.75;
+   eng->move_claw_line(current_x_cal, current_y_cal, 0);
 }
 
 
@@ -247,6 +260,10 @@ void GantryWindow::manualMove(int direction)
    bool decreasing = (direction >= 100);
    bool angles     = ((direction % 100) > 3);
 
+	std::stringstream msg;
+	msg << "GantryWindow::manualMove() - direction = " << direction;
+	m_logger->log(msg);
+
 	const float degree_mm = 50.0;
 	const float angle_deg = 10.0;
 
@@ -258,7 +275,7 @@ void GantryWindow::manualMove(int direction)
 	}
 
 	if (decreasing) {
-		direction = direction * -1.0;
+		increment = increment * -1.0;
 	} 
 
 	RobotPosition newPosition = eng->getPosition();
@@ -276,8 +293,26 @@ void GantryWindow::manualMove(int direction)
    } else if (direction % 100 == 6) {
 		newPosition.j6 += increment;
    }
-}
 
+	{
+		stringstream msg;
+		msg << "GantryWindow::manualMove - would move to the position: " << endl;
+		msg << newPosition << endl;
+		msg << "Add the moveTo() to finish implementation.";
+		m_logger->log(msg);
+	}
+
+	float speed;
+	if (direction % 100 == 4) // Z-axis
+	{
+	 	speed = BUTTON_SPEED_Z_AXIS;
+	} else {
+		speed = BUTTON_SPEED_NOT_Z_AXIS;
+	}
+
+	eng->moveTo(newPosition, true, speed);
+   update_display();
+} 
 void GantryWindow::sendSerial()
 {
 	string output;

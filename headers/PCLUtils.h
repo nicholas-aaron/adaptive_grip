@@ -87,6 +87,9 @@ void multiplyXYZ(const PointT&, float, PointT &);
 template <typename PointT>
 float distance(const PointT&, const PointT&);
 
+template <typename PointT>
+void downsample(typename pcl::PointCloud<PointT>::Ptr, float);
+
 void dbWaitForEnter(std::string);
 
 }
