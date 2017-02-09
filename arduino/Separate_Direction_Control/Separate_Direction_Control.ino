@@ -30,6 +30,7 @@ int 		limits[ARRAY_SIZE] = {700,700,700,600,600,600};
 // "Curl Limits"
 int 		curlLimits[ARRAY_SIZE] = {400,400,400,50,50,50};
 
+
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);
   pinMode(DIR_1,OUTPUT);
