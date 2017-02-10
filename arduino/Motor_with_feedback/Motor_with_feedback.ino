@@ -12,12 +12,28 @@
 #define FORCE_THRESHOLD 900
 
 
-const char arduinoConfirmation1 = "Ready";
-const char arduinoConfirmation2 = "Opened";
-const char arduinoConfirmation3 = "Closed";
-const char arduinoReply1 = "Initializing Position";
-const char arduinoReply2 = "Opening";
-const char arduinoReply3 = "Closing";
+// Function declarations
+void driveMotor(int (*motors), int degRotation, boolean directions[], int (*positions), int arrayLength );
+void selectMotor(int (*motors), boolean directions[], int (*positions));
+void setPins();
+void holdPosition(int mSecs);
+void testAllMotors(int (*motors), boolean directions[], int (*positions));
+void setMotors(int (*index), int (*motors));
+void setOriginalPosition(int enablePin, int (*positions));
+void openFinger1(int (*motors), boolean directions[], int (*positions));
+void openFinger3(int (*motors), boolean directions[], int (*positions));
+void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*limits));
+void closeAllJoints(int (*motors), boolean directions[], int (*positions));
+void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits), int *(force));
+void checkPressure(int *(force));
+int motorOperation(int i, int check, int *(motor), int *(force));
+
+const char * arduinoConfirmation1 = "Ready";
+const char * arduinoConfirmation2 = "Opened";
+const char * arduinoConfirmation3 = "Closed";
+const char * arduinoReply1 = "Initializing Position";
+const char * arduinoReply2 = "Opening";
+const char * arduinoReply3 = "Closing";
 
 //Declare variables for functions
 char userInput;
@@ -28,7 +44,7 @@ int 		motors[ARRAY_SIZE] = {1,2,3,4,5,6}; //rotate motor or vibrate in place
 
 // True = open
 // False = close
-const boolean 	directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
+boolean 	directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
 
 // Counter to remember how many steps each motor's moved
 int 		positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position

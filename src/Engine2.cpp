@@ -302,7 +302,7 @@ int   Engine2::locate(bool observe_only)
 }
 
 // TODO also update GUI with our last scan location
-int Engine2::scan()
+int Engine2::scan(bool analyse_closest)
 {
    // find clusters
    // rank them based on distance to origin
@@ -341,8 +341,76 @@ int Engine2::scan()
    }
    else {
       add_objects(current_view);
+
+
+
       return 0;
    }
+
+
+	return 1;
+}
+
+
+void
+Engine2::create_closest_surface_map(ClusterCloud current_view, std::vector<WSObject>::iterator object)
+{
+	// Find the closest cluster in the cloud.
+	typedef std::vector<int>::const_iterator IndicesIt;
+	typedef std::vector<Point>::iterator	  PointIterator;
+
+	PointIterator		closest_object_centroid;
+	const RobotPosition currentPos = getPosition();
+
+	// Go through the clusters in the current view, and find the one that's closest
+	// to the object we are trying to approach.
+	float shortest_xy_dist = -1;
+	RobotPosition calculatedPosition = getPosition();
+	for (PointIterator point = current_view.cf->m_centroids.begin(); point != current_view.cf->m_centroids.end(); ++point)
+	{
+		calculatedPosition = currentPos;
+		calculate_robot_position(*point, calculatedPosition);
+
+		float x_delta = calculatedPosition.x - object->x_position;
+		float y_delta = calculatedPosition.y - object->y_position;
+
+		float distance = sqrt(x_delta * x_delta + y_delta * y_delta);
+
+		if (shortest_xy_dist < 0 || distance < shortest_xy_dist)
+		{
+			shortest_xy_dist = distance;
+			closest_object_centroid = point;
+		}
+	}
+
+	// Take the index of the closest cluster in m_centroids
+	int cluster_index = std::distance(current_view.cf->m_centroids.begin(), closest_object_centroid);
+
+	typedef std::vector<int>::const_iterator IndicesIt;
+	std::vector<int> & points_vector = current_view.cf->m_clusters[cluster_index].indices; // save typing
+
+	closest_cluster_cloud.reset(new PointCloud());
+	for (IndicesIt point = points_vector.begin(); point != points_vector.end(); point++)
+	{
+		closest_cluster_cloud->push_back((*current_view.cloud)[*point]);
+	}
+
+	add_cloud_to_viewer(closest_cluster_cloud, "ClosestCluster", vp_calibration_axes, 255, 0, 0);
+
+	// for now, return the height from the floor plane
+///Cluster<Point> clusterPoint(*closest_object_centroid);
+///height = std::fabs(clusterPoint.get_distance_to_plane(m_floor_plane)) + DEFAULT_FLOOR_HEIGHT;
+
+///{
+///	stringstream msg;
+///	msg << "get_approach(): Calculated a height of " << height;
+///	m_logger->log(msg);
+///}
+
+	// Then: initialize a SurfaceMap object using closest_cluster_cloud
+
+
+
 }
 
 // fucking broken!! 
@@ -393,7 +461,12 @@ bool Engine2::vantage_point(std::vector<WSObject>::iterator object)
 
 bool Engine2::pickup(std::vector<WSObject>::iterator obj)
 {
+	// TODO we should exit if we're not close enough to the object.
+	// TODO should also exit if the object was observed at a far-away location.
+
 	m_logger->log("Entering Engine2::pickup()");
+///create_closest_surface_map(current_view, obj);
+
    scan();
 
    RobotPosition obj_position = getPosition();
@@ -406,9 +479,12 @@ bool Engine2::pickup(std::vector<WSObject>::iterator obj)
       //position_valid = false;
 
 		stringstream msg;
-        float z_height = 75 + (obj->plane_distance - 0.349483) * 1000; // 1000 = millimetres per metre
+        float z_height = 105 + (obj->plane_distance - 0.349483) * 1000; // 1000 = millimetres per metre
 		msg << "The recommended Z-axis height is " << z_height << " (plane_distance = " << obj->plane_distance << ")";
 		m_logger->log(msg);
+
+        obj_position.z = z_height;
+        moveTo(obj_position);
    }
 	m_logger->log("Exiting Engine2::pickup()");
    return true;
@@ -534,7 +610,7 @@ Engine2::Engine2(pcl::visualization::PCLVisualizer::Ptr vis,
    cam_cloud_(new PointCloud()),
    dummy_mutex_(new Mutex()),
    m_camera(cam_cloud_, dummy_mutex_),
-   m_robot(new RobotExt("/dev/gantry")),
+   m_robot(new Robot("/dev/gantry")),
    m_logger(logger)
    
 {
@@ -660,7 +736,10 @@ Engine2::move_to_object(int index)
       m_logger->log(msg);
    }
 
-   pickup(object);
+    create_closest_surface_map(current_view, object);
+
+
+// pickup(object);
 
    // Re-load the point cloud
 

@@ -56,6 +56,9 @@ public:
    PointCloud::Ptr   cam_cloud_;
    Mutex *           dummy_mutex_;
 
+	// new
+	PointCloud::Ptr	closest_cluster_cloud;
+
    // VIEWPORTS
    int      vp_calibration_clouds;
    int      vp_calibration_axes;
@@ -109,7 +112,7 @@ public:
    bool remove_object(float x, float y);
 
 
-   RobotExt *                       m_robot;
+   Robot *                       	m_robot;
    bool                             m_got_floor_plane;
    Eigen::Vector4f                  m_floor_plane;
    ustate_t                         m_state;
@@ -185,7 +188,7 @@ public:
 
    bool prepare_grab(std::vector<WSObject>::iterator);
 
-   virtual int scan();
+   virtual int scan(bool analyse_closest=false);
 
    std::vector<WSObject>::iterator get_closest_object();
 
@@ -193,6 +196,8 @@ public:
    virtual bool pickup(std::vector<WSObject>::iterator);
 
 	float z_ceiling;
+
+	void create_closest_surface_map(ClusterCloud, std::vector<WSObject>::iterator);
 
 public:
    // Just in case..

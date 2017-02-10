@@ -25,8 +25,9 @@ void falseBooleanArray(boolean directions[], int arrayLength)
   }
 }
 
-void printPositions(int (*positions)){
-  for (int x = 0; x < 6; x++){
+void printPositions(int *positions) {
+
+  for (int x = 0; x < 6; x++) {
     Serial.print("position[" + String(x) + "] :" + String(positions[x]) + "   |   ");
   }
   Serial.println("");
@@ -85,7 +86,7 @@ void userMotorChoice(char userInput, int (*motors), boolean directions[])
         break;
     } case 'e': {
         openAllJoints(motors,directions,positions,limits);
-        curlGrab(motors, directions, positions, curlLimits);
+        curlGrab(motors, directions, positions, curlLimits, force);
         break;
     } case 'f':{
         closeAllJoints(motors,directions,positions);
@@ -118,7 +119,6 @@ void displayMenu(){
   Serial.println("1. Motor 1, Clockwise");
   Serial.println("2. Motor 2, Clockwise");
   Serial.println("3. Motor 3, Clockwise");
-  Serial.println("4. Motor 4, Clockwise");
   Serial.println("4. Motor 4, Clockwise");
   Serial.println("5. Motor 5, Clockwise");
   Serial.println("6. Motor 6, Clockwise");
