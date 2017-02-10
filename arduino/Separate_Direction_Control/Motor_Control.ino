@@ -239,6 +239,8 @@ void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*l
     check = 0;
     for (int i = 0; i < 6; i++)
       {
+        
+        if (i == 4) continue;
 
         if(positions[i] < limits[i])
         {
@@ -257,6 +259,8 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions))
 {
   for (int i = 0; i < 6; i++)
   {
+    if (i == 4) continue;
+    
     directions[i] = false;
   }
 
@@ -293,6 +297,9 @@ void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits))
     check = 0;
     for (int i = 0; i < 6; i++)
       {
+        
+        if (i == 4) continue;
+        
         if(positions[i] > limits[i])
         {
           motors[i] = i+3;
