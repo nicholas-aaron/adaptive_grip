@@ -17,6 +17,7 @@ int Engine2::add_object(Point point, bool closest)
    const float y_delta = objectPosition.y - getPosition().y;
    const float observation_distance = sqrt(x_delta*x_delta + y_delta*y_delta);
 
+
    typedef std::vector<WSObject>::iterator   Iterator;
 
    bool object_exists = false;
@@ -61,6 +62,15 @@ int Engine2::add_object(Point point, bool closest)
 
    update_object->point = point;
    update_object->observation_distance = observation_distance;
+
+   Cluster<Point> point_cluster(update_object->point);
+   float distance_to_plane = fabs(point_cluster.get_distance_to_plane(m_floor_plane));
+	update_object->plane_distance = (distance_to_plane + DEFAULT_FLOOR_HEIGHT);
+   {
+//    std::stringstream msg;
+//    msg << "Calculated a distance-to-plane of " << (distance_to_plane + DEFAULT_FLOOR_HEIGHT)  << ".";
+//    m_logger->log(msg);
+   }
 
    // Update R, G, B
    if (closest) {
@@ -393,7 +403,12 @@ bool Engine2::pickup(std::vector<WSObject>::iterator obj)
       return false;
    } else {
       moveTo(obj_position);
-      position_valid = false;
+      //position_valid = false;
+
+		stringstream msg;
+        float z_height = 75 + (obj->plane_distance - 0.349483) * 1000; // 1000 = millimetres per metre
+		msg << "The recommended Z-axis height is " << z_height << " (plane_distance = " << obj->plane_distance << ")";
+		m_logger->log(msg);
    }
 	m_logger->log("Exiting Engine2::pickup()");
    return true;

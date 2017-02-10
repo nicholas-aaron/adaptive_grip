@@ -76,7 +76,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QTextEdit" name="arduino_pte"/>
+      <widget class="QTextEdit" name="arduinoInput"/>
      </item>
      <item>
       <widget class="QPushButton" name="arduinoButton">
@@ -315,7 +315,7 @@
       <x>940</x>
       <y>40</y>
       <width>151</width>
-      <height>201</height>
+      <height>221</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">

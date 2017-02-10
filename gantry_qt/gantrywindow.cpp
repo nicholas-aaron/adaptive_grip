@@ -94,6 +94,7 @@ GantryWindow::GantryWindow(QWidget *parent) :
     et = new EngThread(eng, eng->m_robot->currentPos());
     QObject::connect(et, SIGNAL(finished()), et, SLOT(quit()));
 
+	 // Try to initialize an Arduino connected to /dev/ttyUSB1
 	 clawduino = new Clawduino(m_logger, "/dev/ttyUSB1");
 
 	 // Set a default "claw line"
@@ -113,11 +114,9 @@ void GantryWindow::stopLiveFeed() {
 void
 GantryWindow::home()
 {
-//   eng->m_robot->runCmd("RUN HOME5");
-//  update_display();
-    m_logger->log("The old \"HOME5\" has been deprecated because it puts the claw at risk.");
-    m_logger->log("Returning.");
-
+    // Ryan changed HOME5. It's safe.
+    eng->m_robot->runCmd("RUN HOME5");
+    update_display();
 }
 
 void 
@@ -135,8 +134,8 @@ GantryWindow::load_calibration()
    update_display();
 
 
-	current_x_cal = -3.75;
-	current_y_cal = -0.75;
+    current_x_cal = -3.05;
+    current_y_cal = -0.95;
    eng->move_claw_line(current_x_cal, current_y_cal, 0);
 }
 
@@ -152,6 +151,8 @@ GantryWindow::move_to_location()
    using stringmanip::arg_list;
    arg_list args = stringmanip::split(editor_text);
 
+   bool z_set = false;
+
    while (!args.empty()) {
       std::string axis = args.front();
       float value;
@@ -166,7 +167,10 @@ GantryWindow::move_to_location()
 
       if      (axis == "x")      new_pos.x = value;
       else if (axis == "y")      new_pos.y = value;
-      else if (axis == "z")      new_pos.z = value;
+      else if (axis == "z")      {
+          new_pos.z = value;
+          z_set = true;
+      }
       else if (axis == "j4")     new_pos.j4 = value;
       else if (axis == "j5")     new_pos.j5 = value;
       else if (axis == "j6")     new_pos.j6 = value;
@@ -176,13 +180,19 @@ GantryWindow::move_to_location()
       }
    }
 
+   if (!z_set) new_pos.z = 200;
+
    std::cout << "New Position: " << std::endl;
    std::cout << new_pos << std::endl;
 
 // eng->m_robot->moveTo(new_pos);
   
 // Need to be updating the other view in another thread
- eng->moveTo(new_pos);
+if (z_set) {
+	 eng->moveTo(new_pos, true);
+ } else {
+	 eng->moveTo(new_pos, true, XY_SPEED);
+ }
 
   // et->setPos(new_pos);
   // et->start();
@@ -316,5 +326,16 @@ void GantryWindow::manualMove(int direction)
 void GantryWindow::sendSerial()
 {
 	string output;
-	clawduino->send_message("x", output);
+    std::string text_to_send = ui->arduinoInput->toPlainText().toUtf8().constData();
+
+	int return_code = clawduino->send_message(text_to_send, output);
+
+	if (return_code == SUCCESS) {
+//////std::stringstream response;
+//////response << "GantryWindow::sendSerial() - got response [" << output << "]";
+//////m_logger->log(response);
+		m_logger->log("GantryWindow::sendSerial() - successful.");
+	} else {
+		m_logger->log("GantryWindow::sendSerial() - could not send message.");
+	}
 }

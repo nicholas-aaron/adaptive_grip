@@ -24,6 +24,7 @@ WSObject::WSObject(const WSObject & copy) {
    r_display = copy.r_display;
    g_display = copy.g_display;
    b_display = copy.b_display;
+           plane_distance = copy.plane_distance;
 }
 
 bool WSObject::operator== (const WSObject& ws) const {
@@ -33,6 +34,7 @@ bool WSObject::operator== (const WSObject& ws) const {
            x_obs_position == ws.x_obs_position &&
            y_obs_position == ws.y_obs_position &&
            observation_distance == ws.observation_distance;
+           plane_distance == ws.plane_distance;
 }
 
 // Static initiations
