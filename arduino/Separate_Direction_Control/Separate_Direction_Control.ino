@@ -1,4 +1,5 @@
 
+// Pin defs
 #define STP 2 // All motor steps are tied together
 #define DIR_1 3 // Each motor has its own direction pin
 #define DIR_2 4
@@ -13,6 +14,23 @@
 char userInput;
 boolean firstRun = true;
 
+//Arrays
+int 		motors[ARRAY_SIZE] = {1,2,3,4,5,6}; //rotate motor or vibrate in place
+
+// True = open
+// False = close
+const boolean 	directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
+
+// Counter to remember how many steps each motor's moved
+int 		positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
+
+// Bounds of the steps - 0 is the lower limit for all
+int 		limits[ARRAY_SIZE] = {700,700,700,600,600,600};
+
+// "Curl Limits"
+int 		curlLimits[ARRAY_SIZE] = {400,400,400,50,50,50};
+
+
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);
   pinMode(DIR_1,OUTPUT);
@@ -22,43 +40,42 @@ void setup() { //--------------------------------------------------- SETUP -----
   pinMode(DIR_5,OUTPUT);
   pinMode(DIR_6,OUTPUT);
   pinMode(EN,OUTPUT);
-  setPins();
+  setPins(); 
   Serial.begin(9600); 
-  Serial.println("Enter number for control option:");
-  Serial.println("1. Motor 1, Clockwise");
-  Serial.println("2. Motor 2, Clockwise");
-  Serial.println("3. Motor 3, Clockwise");
-  Serial.println("4. Motor 4, Clockwise");
-  Serial.println("4. Motor 4, Clockwise");
-  Serial.println("5. Motor 5, Clockwise");
-  Serial.println("6. Motor 6, Clockwise");
-  Serial.println("7. Motor 1, Counter-Clockwise");
-  Serial.println("8. Motor 2, Counter-Clockwise");
-  Serial.println("a. Motor 3, Counter-Clockwise");
-  Serial.println("b. Motor 4, Counter-Clockwise");
-  Serial.println("c. Motor 5, Counter-Clockwise");
-  Serial.println("d. Motor 6, Counter-Clockwise");
-  Serial.println();
+  displayMenu();
 }
 
 void loop() { // ------------------------------------------------------- MAIN LOOP --------------------------------------------------//
-  int motors[ARRAY_SIZE] = {1,2,3,4,5,6};
-  boolean directions[ARRAY_SIZE] = {false,false,false,true,true,true};
-  int positions[ARRAY_SIZE] = {0,0,0,0,0,0};
   if (firstRun){
     setOriginalPosition(EN, positions);
     firstRun = false;  
   }
   
-  //printPositions(positions);
   while (Serial.available()) {
     userInput = Serial.read();
-    Serial.println("Driving Motors");
-    zeroIntArray(motors,ARRAY_SIZE);
-    userMotorChoice(userInput, motors, directions); // Sets new motors array and directions array
-    driveMotor(motors, 5, directions, positions, ARRAY_SIZE);
+    if (userInput =='0'){
+      printPositions(positions);
+      displayMenu();
+    }
+    else{
+
+      zeroIntArray(motors,ARRAY_SIZE);
+      userMotorChoice(userInput, motors, directions); // Sets new motors array and directions array
+      driveMotor(motors, 5, directions, positions, ARRAY_SIZE);
+
+      //debugging
+//      for(int i = 0; i < 6; i++){
+//        Serial.print("Position of motor ");
+//        Serial.print(i+1);
+//        Serial.print(" is: ");
+//        Serial.println(positions[i]);
+//      }
+      //displayMenu();
+    } 
   }
 }
+
+
 
 
 

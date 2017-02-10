@@ -278,32 +278,24 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions))
     driveMotor(motors,5,directions,positions,6);
   }
 }
-
-void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits))
+//added force parameter
+void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits), int *(force))
 {
+  checkPressure(force);
 
   for (int i = 0; i < 6; i++)
-  {
     directions[i] = false;
-  }
 
   int check = 1;
   while(check != 0)
   {
     check = 0;
     for (int i = 0; i < 6; i++)
-      {
-        if(positions[i] > limits[i])
-        {
-          motors[i] = i+3;
-          check = check + 1;
-        }
-        else // (positionspi] >= limits[i])
-          motors[i] = 0;
-      }
-   if (check != 0)
-    driveMotor(motors,5,directions,positions,6);
+       check = motorOperation(i, check, motors, force);
+    if (check != 0)
+      driveMotor(motors,5,directions,positions,6);
   }
+  
 
 }
 
