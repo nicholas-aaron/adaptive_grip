@@ -5,7 +5,7 @@ void driveMotor(int (*motors), int degRotation, boolean directions[], int (*posi
   boolean dirSwitch = false;
   for (int x = 0; x < numSteps; x++)
   {
-    if (dirSwitch) {
+    if (dirSwitch) { //Sets the motor to open
       digitalWrite(DIR_1, HIGH);
       digitalWrite(DIR_2, HIGH);
       digitalWrite(DIR_3, HIGH);
@@ -14,7 +14,7 @@ void driveMotor(int (*motors), int degRotation, boolean directions[], int (*posi
       digitalWrite(DIR_6, HIGH);
       dirSwitch = !dirSwitch;
     }
-    else {
+    else { //Sets the motor to close 
       digitalWrite(DIR_1, LOW);
       digitalWrite(DIR_2, LOW);
       digitalWrite(DIR_3, LOW);
@@ -31,13 +31,6 @@ void driveMotor(int (*motors), int degRotation, boolean directions[], int (*posi
     delay(2);
     digitalWrite(STP, LOW);
   }
-  //debugging
-  //  for(int i = 0; i < 6; i++){
-  //    Serial.print("Position of motor ");
-  //    Serial.print(i+1);
-  //    Serial.print(" is: ");
-  //    Serial.println(positions[i]);
-  //  }
 }
 
 void selectMotor(int (*motors), boolean directions[], int (*positions))
@@ -123,7 +116,7 @@ void holdPosition(int mSecs)
   }
 }
 
-void testAllMotors(int (*motors), boolean directions[], int (*positions))
+void testAllMotors(int (*motors), boolean directions[], int (*positions)) //test code FOR MOTORS ONLY, do not use when the motors are attached to the robot
 {
 
   int idx[6] = {0, 0, 0, 0, 0, 0};
@@ -169,7 +162,7 @@ void setOriginalPosition(int enablePin, int (*positions))
   digitalWrite(enablePin, LOW); //Turns the motors back on - draws max current so don't remain in this state for a long time
 }
 
-void openFinger1(int (*motors), boolean directions[], int (*positions))
+void openFinger1(int (*motors), boolean directions[], int (*positions)) //useless
 {
   setPins();
   directions[1] = true;
@@ -198,7 +191,7 @@ void openFinger1(int (*motors), boolean directions[], int (*positions))
     driveMotor(motors, 5, directions, positions, 6);
   }
 }
-void openFinger3(int (*motors), boolean directions[], int (*positions))
+void openFinger3(int (*motors), boolean directions[], int (*positions)) //useless
 {
   setPins();
   directions[2] = true;
