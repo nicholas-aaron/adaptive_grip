@@ -30,6 +30,9 @@ ItemDisplayWindow::cycle()
    using std::cout;
    using std::endl;
    cout << "select_index = " << select_index << endl;
+   cout << "Selected object's distance to plane = "  << (*m_objects)[select_index].plane_distance << endl;
+
+
    update();
 
 }

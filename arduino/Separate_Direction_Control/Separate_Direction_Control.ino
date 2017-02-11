@@ -11,6 +11,8 @@
 #define ARRAY_SIZE 6
 #define FORCE_THRESHOLD 500
 
+#define FORCE_THRESHOLD 900
+
 //Declare variables for functions
 char userInput;
 boolean firstRun = true;
@@ -20,7 +22,7 @@ int 		motors[ARRAY_SIZE] = {1,2,3,4,5,6}; //rotate motor or vibrate in place
 
 // True = open
 // False = close
-const boolean 	directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
+boolean 	directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
 
 // Counter to remember how many steps each motor's moved
 int 		positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
@@ -37,6 +39,26 @@ int force[3] = {0, 0, 0};
 //force[1]: paired with motor 2 and 4, A0
 //force[2]: paired with motor 3 and 5. A1
 
+
+// function declarations
+void printArrays(int(*motors), boolean directions[], int arrayLength);
+void zeroIntArray(int (*motors), int arrayLength);
+void falseBooleanArray(boolean directions[], int arrayLength);
+void printPositions(int (*positions));
+void userMotorChoice(char userInput, int (*motors), boolean directions[]);
+void displayMenu();
+void driveMotor(int (*motors), int degRotation, boolean directions[], int (*positions), int arrayLength );
+void selectMotor(int (*motors), boolean directions[], int (*positions));
+void setPins();
+void holdPosition(int mSecs);
+void testAllMotors(int (*motors), boolean directions[], int (*positions));
+void setMotors(int (*index), int (*motors));
+void setOriginalPosition(int enablePin, int (*positions));
+void openFinger1(int (*motors), boolean directions[], int (*positions));
+void openFinger3(int (*motors), boolean directions[], int (*positions));
+void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*limits));
+void closeAllJoints(int (*motors), boolean directions[], int (*positions));
+void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits), int);
 
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);

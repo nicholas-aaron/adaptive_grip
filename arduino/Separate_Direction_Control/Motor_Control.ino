@@ -241,6 +241,8 @@ void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*l
     {
       if (i != 4) //motor 5 does not work
       {
+        
+        if (i == 4) continue;
 
         if (positions[i] < limits[i])
         {
@@ -262,6 +264,8 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions))
 {
   for (int i = 0; i < 6; i++)
   {
+    if (i == 4) continue;
+    
     directions[i] = false;
   }
 

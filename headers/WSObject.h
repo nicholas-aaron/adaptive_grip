@@ -28,6 +28,7 @@ class WSObject {
 
 	float x_obs_position, y_obs_position;
 	float r_display, g_display, b_display;
+	float plane_distance;
 
    WSObject(float x, float y, float obs_dist);
 
