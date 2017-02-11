@@ -289,9 +289,12 @@ void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits),
   int check = 1;
   while(check != 0)
   {
+    //Serial.println(force[0]);
+    //Serial.println(force[1]);
+    //Serial.println(force[2]);
     check = 0;
     for (int i = 0; i < 6; i++)
-       check = motorOperation(i, check, motors, force);
+       check = motorOperation(i, check, motors, force, limits, positions);
     if (check != 0)
       driveMotor(motors,5,directions,positions,6);
   }

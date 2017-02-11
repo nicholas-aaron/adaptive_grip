@@ -24,7 +24,7 @@ void driveMotor(int (*motors), int degRotation, boolean directions[], int (*posi
       dirSwitch = !dirSwitch;
     }
 
-		// Overwrite directions
+    // Overwrite directions
     selectMotor(motors, directions, positions);
     delay(2);
     digitalWrite(STP, HIGH);
@@ -169,7 +169,7 @@ void setOriginalPosition(int enablePin, int (*positions))
   digitalWrite(enablePin, LOW); //Turns the motors back on - draws max current so don't remain in this state for a long time
 }
 
-void openFinger1(int (*motors), boolean directions[], int (*positions)) 
+void openFinger1(int (*motors), boolean directions[], int (*positions))
 {
   setPins();
   directions[1] = true;
@@ -198,7 +198,7 @@ void openFinger1(int (*motors), boolean directions[], int (*positions))
     driveMotor(motors, 5, directions, positions, 6);
   }
 }
-void openFinger3(int (*motors), boolean directions[], int (*positions)) 
+void openFinger3(int (*motors), boolean directions[], int (*positions))
 {
   setPins();
   directions[2] = true;
@@ -234,22 +234,27 @@ void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*l
   }
 
   int check = 1;
-  while(check != 0)
+  while (check != 0)
   {
     check = 0;
     for (int i = 0; i < 6; i++)
+    {
+      if (i != 4) //motor 5 does not work
       {
 
-        if(positions[i] < limits[i])
+        if (positions[i] < limits[i])
         {
-          motors[i] = i+3;
+          motors[i] = i + 3;
           check = check + 1;
         }
         else // (positionspi] >= limits[i])
           motors[i] = 0;
       }
-   if (check != 0)
-    driveMotor(motors,5,directions,positions,6);
+      else // (positionspi] >= limits[i])
+        motors[i] = 0;
+    }
+    if (check != 0)
+      driveMotor(motors, 5, directions, positions, 6);
   }
 }
 
@@ -261,25 +266,25 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions))
   }
 
   int check = 1;
-  while(check != 0)
+  while (check != 0)
   {
     check = 0;
     for (int i = 0; i < 6; i++)
-      { 
-        if(positions[i] > 20) //leave a little room so that i don't over extend
-        {
-          motors[i] = i+3;
-          check = check + 1;
-        }
-        else // (positionspi] >= limits[i])
-          motors[i] = 0;
+    {
+      if (positions[i] > 20) //leave a little room so that i don't over extend
+      {
+        motors[i] = i + 3;
+        check = check + 1;
       }
-   if (check != 0)
-    driveMotor(motors,5,directions,positions,6);
+      else // (positionspi] >= limits[i])
+        motors[i] = 0;
+    }
+    if (check != 0)
+      driveMotor(motors, 5, directions, positions, 6);
   }
 }
 
-void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits))
+void curlGrab(int(*motors), boolean directions[], int(*positions), int (*limits), int (*force))
 {
 
   for (int i = 0; i < 6; i++)
@@ -288,21 +293,59 @@ void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits))
   }
 
   int check = 1;
-  while(check != 0)
+  while (check != 0)
   {
     check = 0;
     for (int i = 0; i < 6; i++)
+    {
+      if (positions[i] > limits[i])
       {
-        if(positions[i] > limits[i])
-        {
-          motors[i] = i+3;
-          check = check + 1;
-        }
-        else // (positionspi] >= limits[i])
-          motors[i] = 0;
+        motors[i] = i + 3;
+        check = check + 1;
       }
-   if (check != 0)
-    driveMotor(motors,5,directions,positions,6);
+      else // (positionspi] >= limits[i])
+        motors[i] = 0;
+      checkPressure(force);
+      if (i < 3)
+      {
+        if (force[i] < FORCE_THRESHOLD)
+        {
+          //check positions
+        }
+        else {
+          switch(i){
+            case 0:{
+              if (motors[0] != 0)
+                check = check -1;
+              if (motors[5] != 0)
+                check = check -1;
+              motors[0] = 0;
+              motors[5] = 0;
+            }
+            case 1:{
+              if (motors[1] != 0)
+                check = check -1;
+              if (motors[3] != 0)
+                check = check -1;
+              motors[1] = 0;
+              motors[3] = 0;
+            }
+            case 2:{
+              if (motors[2] != 0)
+                check = check -1;
+              if (motors[4] != 0)
+                check = check -1;
+              motors[2] = 0;
+              motors[4] = 0;
+            }
+            
+          }
+        }
+      }
+    }
+
+    if (check != 0)
+      driveMotor(motors, 5, directions, positions, 6);
   }
 
 }

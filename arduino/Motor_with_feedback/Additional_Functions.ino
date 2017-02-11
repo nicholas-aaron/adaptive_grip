@@ -94,6 +94,11 @@ void userMotorChoice(char userInput, int (*motors), boolean directions[])
         openAllJoints(motors,directions,positions,limits);
         break;
     }
+    case 'i': {
+        openAllJoints(motors,directions,positions,limits);
+        curlGrab(motors,directions,positions,clampLimits,force);
+        break;
+    }
 
     case 'z': {
         firstRun = true;

@@ -4,10 +4,10 @@
  */
 
 
-void checkPressure(int *(force)){
-  force[0] = analogRead(A0);
-  force[1] = analogRead(A2);
-  force[2] = analogRead(A3);
+void checkPressure(int (*force)){
+  force[0] = analogRead(A2);//1-6
+  force[1] = analogRead(A0);//2-4
+  force[2] = analogRead(A1);//3-5
 }
 
 /**
@@ -16,7 +16,7 @@ void checkPressure(int *(force)){
  * *force - integer array pointer of the force values
  */
 
-int motorOperation(int i, int check, int *(motor), int *(force)){
+int motorOperation(int i, int check, int (*motor), int (*force), int (*limits), int (*positions)){
   if(positions[i] > limits[i])// check if motor has not fully closed -> keep motor rotating
   {
     if((i == 1 || i ==6) && force[0] < FORCE_THRESHOLD){//check if associated pressure sensor is under the threshold
@@ -33,7 +33,7 @@ int motorOperation(int i, int check, int *(motor), int *(force)){
     else{
       motors[i] = 0;
     }
-    if((i == 2 || i ==4) && force[1] < FORCE_THRESHOLD){
+    if((i == 3 || i ==5) && force[2] < FORCE_THRESHOLD){
       motors[i] = i+3;
       check = check + 1;
     }

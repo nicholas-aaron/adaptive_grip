@@ -32,7 +32,7 @@ void printPositions(int (*positions)){
   Serial.println("");
 }
 
-void userMotorChoice(char userInput, int (*motors), boolean directions[])
+void userMotorChoice(char userInput, int (*motors), boolean directions[], int (*force))
 {
   switch (userInput) {
     case '1': {
@@ -85,7 +85,7 @@ void userMotorChoice(char userInput, int (*motors), boolean directions[])
         break;
     } case 'e': {
         openAllJoints(motors,directions,positions,limits);
-        curlGrab(motors, directions, positions, curlLimits);
+        curlGrab(motors, directions, positions, curlLimits, force);
         break;
     } case 'f':{
         closeAllJoints(motors,directions,positions);
@@ -93,21 +93,32 @@ void userMotorChoice(char userInput, int (*motors), boolean directions[])
     } case 'h': {
         openAllJoints(motors,directions,positions,limits);
         break;
-    }
-
-    case 'z': {
+    } case 'i': {
+        openAllJoints(motors,directions,positions,limits);
+        curlGrab(motors,directions,positions,clampLimits,force);
+        break;
+    } case 'z': {
         firstRun = true;
         setPins();
         break;
-    }
-      
-    default: {
+    } case 'k': {
+        checkPressure(force);
+        Serial.println(force[0]);
+        Serial.println(force[0]);
+        Serial.println(force[0]);
+    }default: {
         //do something
         Serial.println("ERROR, User input was incorrect");
         directions[0] = false;
         break;
       }
   }
+}
+
+void checkPressure(int (*force)){
+  force[0] = analogRead(A2);//1-6
+  force[1] = analogRead(A0);//2-4
+  force[2] = analogRead(A1);//3-5
 }
 
 
@@ -132,5 +143,7 @@ void displayMenu(){
   Serial.println("z. Reset positions, claw limp");
   Serial.println("f. Close All Joints");
   Serial.println("h. Open All Joints");
+  Serial.println("i. Grab Object");
+  Serial.println("k. Show Pressure Values");
   Serial.println();
 }
