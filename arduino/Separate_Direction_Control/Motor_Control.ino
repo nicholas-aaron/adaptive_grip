@@ -162,68 +162,15 @@ void setOriginalPosition(int enablePin, int (*positions))
   digitalWrite(enablePin, LOW); //Turns the motors back on - draws max current so don't remain in this state for a long time
 }
 
-void openFinger1(int (*motors), boolean directions[], int (*positions)) //useless
-{
-  setPins();
-  directions[1] = true;
-  directions[3] = true;
-  motors[1] = DIR_2; // these two motors will be moving
-  motors[3] = DIR_4;
-  int limit_1 = 900;
-  int limit_3 = 630;
-
-  while (positions[1] < limit_1 || positions[3] < limit_3) {
-    if (positions[1] < limit_1 && positions[3] < limit_3) {
-      motors[1] = DIR_2; // these two motors will be moving
-      motors[3] = DIR_4;
-    }
-    else {
-      if (positions[1] < limit_1)
-      {
-        motors[1] = DIR_2; // these two motors will be moving
-        motors[3] = 0;
-      }
-      else {
-        motors[1] = 0; // these two motors will be moving
-        motors[3] = DIR_4;
-      }
-    }
-    driveMotor(motors, 5, directions, positions, 6);
-  }
-}
-void openFinger3(int (*motors), boolean directions[], int (*positions)) //useless
-{
-  setPins();
-  directions[2] = true;
-  directions[4] = true;
-  int limit_1 = 900;
-  int limit_3 = 600;
-
-  while (positions[2] < limit_1 || positions[4] < limit_3) {
-    if (positions[2] < limit_1 && positions[4] < limit_3) {
-      motors[2] = DIR_3; // these two motors will be moving
-      motors[4] = DIR_5;
-    }
-    else {
-      if (positions[2] < limit_1)
-      {
-        motors[2] = DIR_3; // these two motors will be moving
-        motors[4] = 0;
-      }
-      else {
-        motors[2] = 0; // these two motors will be moving
-        motors[4] = DIR_5;
-      }
-    }
-    driveMotor(motors, 5, directions, positions, 6);
-  }
-}
 
 void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*limits))
 {
   for (int i = 0; i < 6; i++)
   {
-    directions[i] = true;
+    if (position[i] < limits[i])
+      directions[i] = true; // open
+    else
+      directions[i] = false; //close
   }
 
   int check = 1;
@@ -279,6 +226,95 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions))
     if (check != 0)
       driveMotor(motors, 5, directions, positions, 6);
   }
+}
+
+void grab(int (*motors), boolean directions[], int (*positions))
+{
+  for (int i = 0; i < 6; i ++)
+  {
+    directions[i] = false;
+  }
+
+  boolean exitFlag = false;
+  boolean shouldCloseProximals = true;
+  boolean openProximals = true;
+  boolean closeDistals = false;
+  boolean openDistals = false;
+
+  while(!exitFlag) // exits when the force sensor reading surpasses the threshold 
+  {
+    while(shouldCloseProximals)
+    {
+      shouldCloseProximals = closeProximals(motors, positions, directions, targets); //updates based on motor position
+      if (shouldCloseProximals)
+        shouldCloseProximals = closeProximalsUpdate(force, exitFlag); // updates based on pressure sensing
+    }
+
+    while(shouldOpenProximals)
+    {
+      shouldOpenProximals = openProximals();
+    }
+
+    closeDistals();
+  }
+}
+
+
+boolean closeProximals(int (*motors), int (*positions), boolean directions[], int (*targets))
+{
+  boolean didMotorsMove = false;
+  for (int i = 3; i < 6; i++)
+  {
+    directions[i] = false; //set the direction for each of the motors to 'close'
+    if ( positions[i] > targets[i])
+    {
+      didMotorsMove = true;
+      motors[i] = i+3;
+    }
+  }
+    if (didMotorsMove)
+    {
+      driveMotor(motors, 3, directions, positions, arrayLength);
+    }
+    zeroIntArray(motors, 6);
+    return didMotorsMove;
+}
+
+boolean closeProximalsUpdate(int (*force), boolean *exitFlag)
+{
+  boolean noPressure = true;
+  for (i = 0; i < 3; i++) // loop through all of the pressure sensors
+  {
+    if (force[i] > FORCE_THRESHOLD)
+    {
+      noPressure = false;
+      exitFlag = true;
+    }
+
+  }
+  return noPressure; // This value is stored as openProximal - true for yes, open. false for no, do not open
+}
+
+boolean openProximals()
+{
+  
+  boolean didMotorsMove = false;
+  for (int i = 3; i < 6; i++)
+  {
+    directions[i] = false; //set the direction for each of the motors to 'close'
+    if ( positions[i] > targets[i])
+    {
+      didMotorsMove = true;
+      motors[i] = i+3;
+    }
+  }
+    if (didMotorsMove)
+    {
+      driveMotor(motors, 3, directions, positions, arrayLength);
+    }
+    zeroIntArray(motors, 6);
+    return didMotorsMove;
+  
 }
 
 void curlGrab(int(*motors), boolean directions[], int(*positions), int (*limits), int (*force))
