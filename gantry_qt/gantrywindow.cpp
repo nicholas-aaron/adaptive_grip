@@ -62,6 +62,7 @@ GantryWindow::GantryWindow(QWidget *parent) :
     ui->cal_x_spin->setMinimum(-100.0);
 	
   
+    /*
     // Signal-mapping the slots for the "move" "here" buttons
     QSignalMapper * buttonMapper = new QSignalMapper(this);
     buttonMapper->setMapping(ui->decreaseXButton, DECREASE_X);
@@ -89,6 +90,7 @@ GantryWindow::GantryWindow(QWidget *parent) :
     CHECKED_CONNECT(ui->increasej5Button, SIGNAL(pressed()), buttonMapper, SLOT(map()));
     CHECKED_CONNECT(ui->increasej6Button, SIGNAL(pressed()), buttonMapper, SLOT(map()));
     QObject::connect(buttonMapper, SIGNAL(mapped(int)), this, SLOT(manualMove(int)));
+    */
         
     // Thread
     et = new EngThread(eng, eng->m_robot->currentPos());
@@ -101,6 +103,8 @@ GantryWindow::GantryWindow(QWidget *parent) :
 ////#define DEFAULT_CLAW_OFFSET -0.75, -3.15
 	 m_logger->log("Setting default 'claw' offset to -0.75, -3.15.");
     eng->move_claw_line(-0.75, -3.15, 0);
+
+
 }
 
 void GantryWindow::startLiveFeed() { 
@@ -115,7 +119,8 @@ void
 GantryWindow::home()
 {
     // Ryan changed HOME5. It's safe.
-    eng->m_robot->runCmd("RUN HOME5");
+    std::string s = "RUN HOME5";
+    eng->m_robot->runCmd(s);
     update_display();
 }
 
@@ -124,6 +129,9 @@ GantryWindow::center_item()
 {
    eng->move_to_object(ui->itemDisplay->get_index());
    update_display();
+
+     ui->chartView->surface = eng->surface;
+	ui->chartView->updateSeries();
 }
 
 void 

@@ -1,3 +1,6 @@
+#ifndef SURFACE_MAP__H
+#define SURFACE_MAP__H
+
 #include "common_defs.h"
 #include "PCLUtils.h"
 #include "Calibration.h"
@@ -40,3 +43,5 @@ public:
 	int initialize(PointCloud::Ptr surface, const Point & centroid, const Calibration & cal);
 
 };
+
+#endif

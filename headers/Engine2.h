@@ -17,6 +17,7 @@
 #include "CCloud.h"
 #include "Calibration.h"
 #include "WSObject.h"
+#include "SurfaceMap.h"
 
 
 // How far away, from the centroid of an object, in the X direction,
@@ -198,6 +199,8 @@ public:
 	float z_ceiling;
 
 	void create_closest_surface_map(ClusterCloud, std::vector<WSObject>::iterator);
+
+	SurfaceMap * surface;
 
 public:
    // Just in case..

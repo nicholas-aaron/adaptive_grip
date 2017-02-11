@@ -409,6 +409,11 @@ Engine2::create_closest_surface_map(ClusterCloud current_view, std::vector<WSObj
 
 	// Then: initialize a SurfaceMap object using closest_cluster_cloud
 
+	surface = new SurfaceMap();
+	// Load the surface
+    surface->initialize(closest_cluster_cloud, *closest_object_centroid, m_cal);
+
+	
 
 
 }
