@@ -332,7 +332,7 @@ void closeDistals()
       }
     }
     if (numMotorsMoved != 0)
-      driveMotor(motors, 3, directions, positions, 6);
+      driveMotor(motors, 10, directions, positions, 6);
     zeroIntArray(motors,6);
   }
 }
