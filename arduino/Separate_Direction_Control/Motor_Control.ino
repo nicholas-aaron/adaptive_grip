@@ -167,7 +167,7 @@ void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*l
 {
   for (int i = 0; i < 6; i++)
   {
-    if (position[i] < limits[i])
+    if (positions[i] < limits[i])
       directions[i] = true; // open
     else
       directions[i] = false; //close
@@ -228,31 +228,24 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions))
   }
 }
 
-void grab(int (*motors), boolean directions[], int (*positions))
+void grab(int (*motors), boolean directions[], int (*positions), int (*innerLimits), int (*outerLimits))
 {
-  for (int i = 0; i < 6; i ++)
-  {
-    directions[i] = false;
-  }
+  boolean objectGrabbed = false;
+  boolean keepClosingProximals = true;
+  boolean keepOpeningProximals = true;
 
-  boolean exitFlag = false;
-  boolean shouldCloseProximals = true;
-  boolean openProximals = true;
-  boolean closeDistals = false;
-  boolean openDistals = false;
-
-  while(!exitFlag) // exits when the force sensor reading surpasses the threshold 
+  while(!objectGrabbed) // exits when the force sensor reading surpasses the threshold 
   {
-    while(shouldCloseProximals)
+    while(keepClosingProximals)
     {
-      shouldCloseProximals = closeProximals(motors, positions, directions, targets); //updates based on motor position
-      if (shouldCloseProximals)
-        shouldCloseProximals = closeProximalsUpdate(force, exitFlag); // updates based on pressure sensing
+      keepClosingProximals = closeProximals(motors, positions, directions, innerLimits); //updates based on motor position
+      if (keepClosingProximals)
+        keepClosingProximals = closeProximalsUpdate(force, objectGrabbed); // updates based on pressure sensing
     }
 
-    while(shouldOpenProximals)
+    while(keepOpeningProximals)
     {
-      shouldOpenProximals = openProximals();
+      keepOpeningProximals = openProximals(motors, positions, directions, outerLimits);
     }
 
     closeDistals();
@@ -260,61 +253,88 @@ void grab(int (*motors), boolean directions[], int (*positions))
 }
 
 
-boolean closeProximals(int (*motors), int (*positions), boolean directions[], int (*targets))
+boolean closeProximals(int (*motors), int (*positions), boolean directions[], int (*innerLimits))
 {
-  boolean didMotorsMove = false;
+  int numMotorsMoved = 0;
+  boolean closeMore = false;
+
   for (int i = 3; i < 6; i++)
   {
-    directions[i] = false; //set the direction for each of the motors to 'close'
-    if ( positions[i] > targets[i])
+    directions[i] = false; //set the direction for each of the motors to 'close' : This might be a redundant line. You've already set the direction to false before entering the function
+    if (positions[i] > innerLimits[i]) // If the position has not yet reached the target position, move the motor
     {
-      didMotorsMove = true;
+      numMotorsMoved = numMotorsMoved + 1;
       motors[i] = i+3;
     }
   }
-    if (didMotorsMove)
-    {
-      driveMotor(motors, 3, directions, positions, arrayLength);
-    }
-    zeroIntArray(motors, 6);
-    return didMotorsMove;
+
+  if (numMotorsMoved != 0)
+  {
+    driveMotor(motors, 3, directions, positions, 6);
+    closeMore = true;
+  }
+
+  zeroIntArray(motors, 6);
+  return closeMore;
 }
 
-boolean closeProximalsUpdate(int (*force), boolean *exitFlag)
+boolean closeProximalsUpdate(int (*force), boolean &objectGrabbed)
 {
   boolean noPressure = true;
-  for (i = 0; i < 3; i++) // loop through all of the pressure sensors
+  for (int i = 0; i < 6; i++) // loop through all of the pressure sensors
   {
     if (force[i] > FORCE_THRESHOLD)
     {
       noPressure = false;
-      exitFlag = true;
+      objectGrabbed = true;
     }
 
   }
   return noPressure; // This value is stored as openProximal - true for yes, open. false for no, do not open
 }
 
-boolean openProximals()
+boolean openProximals(int (*motors), int (*positions), boolean directions[], int (*outerLimits))
 {
   
-  boolean didMotorsMove = false;
+  int numMotorsMoved = 0;
+  boolean openMore = false;
   for (int i = 3; i < 6; i++)
   {
-    directions[i] = false; //set the direction for each of the motors to 'close'
-    if ( positions[i] > targets[i])
+    directions[i] = true; //set the direction for each of the motors to 'open'
+    if ( positions[i] < (int)min(outerLimits[i], positions[0])) // don't overextend beyond the position of one of the large joints (kind of a hack here, fix later if there is time)
     {
-      didMotorsMove = true;
+      numMotorsMoved = numMotorsMoved + 1;
       motors[i] = i+3;
     }
   }
-    if (didMotorsMove)
+    if (numMotorsMoved != 0)
     {
-      driveMotor(motors, 3, directions, positions, arrayLength);
+      driveMotor(motors, 3, directions, positions, 6);
+      openMore = true;
     }
     zeroIntArray(motors, 6);
-    return didMotorsMove;
-  
+    return openMore;
+}
+
+void closeDistals()
+{
+  int numMotorsMoved = 3;
+  while (numMotorsMoved != 0)
+  {
+    numMotorsMoved = 0;
+    for (int i = 0; i < 3; i++)
+    {
+      if (positions[i] > innerLimits[i]) //want to close the joint
+      {
+        directions[i] = false;
+        motors[i] = i+3;
+        numMotorsMoved++;
+      }
+    }
+    if (numMotorsMoved != 0)
+      driveMotor(motors, 3, directions, positions, 6);
+    zeroIntArray(motors,6);
+  }
 }
 
 void curlGrab(int(*motors), boolean directions[], int(*positions), int (*limits), int (*force))
