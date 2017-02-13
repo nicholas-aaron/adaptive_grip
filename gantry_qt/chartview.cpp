@@ -24,6 +24,8 @@ ChartView::updateSeries()
 {
     // read m_series
 
+	 // TODO clear the chart view
+
 #ifndef TEST_RECT
 	 typedef std::vector<Coordinate>::const_iterator	CoordIt;
 
@@ -37,7 +39,10 @@ ChartView::updateSeries()
      points_2d->setColor(QColor(255,0,0));
 
 	 QScatterSeries * convexHull = new QScatterSeries();
-	 surface->convex_hull();
+
+	 // Assume the surface is already initialized.
+////surface->convex_hull();
+////surface->calculateMinimumAreaRect();
 	
 	 // Plot the Convex Hull Dataset
 	 for (CoordIt it = surface->hull.begin(); it != surface->hull.end(); ++it)
@@ -52,7 +57,6 @@ ChartView::updateSeries()
 	 // Plot the minimum-area bounding rectangle
 	 QScatterSeries * boundingRect = new QScatterSeries();
 	 
-	 surface->calculateMinimumAreaRect();
 	 std::vector<Coordinate> boundingVect = surface->minimumAreaRectangle.corners();
 
 	 for (CoordIt it = boundingVect.begin(); it != boundingVect.end(); ++it)
@@ -61,10 +65,9 @@ ChartView::updateSeries()
 		 boundingRect->setMarkerSize(20.0);
 		 boundingRect->setColor(QColor(0, 255, 0));
 	 }
+	 boundingRect->append(surface->minimumAreaRectangle.center.x, surface->minimumAreaRectangle.center.y);
 	 chart()->addSeries(boundingRect);
 	 
-
-
 	 chart()->addSeries(convexHull);
 	 chart()->addSeries(points_2d);
 	 chart()->setTitle("2D Points");

@@ -31,8 +31,11 @@ GantryWindow::GantryWindow(QWidget *parent) :
 
     m_logger = new QLogger(ui->statusDisplay);
 //eng = new Engine3(viewer, m_logger);
+#ifndef TEST_RECT
   eng = new Engine2(viewer, m_logger);
-    ui->itemDisplay->m_objects = eng->m_objects;
+   ui->itemDisplay->m_objects = eng->m_objects;
+#endif
+
 
  //  live_viewer = new LiveViewer(ui->qvtkWidgetLive, viewer, eng->vp_calibration_axes);
     ui->qvtkWidget->SetRenderWindow(viewer->getRenderWindow());
@@ -93,8 +96,8 @@ GantryWindow::GantryWindow(QWidget *parent) :
     */
         
     // Thread
-    et = new EngThread(eng, eng->m_robot->currentPos());
-    QObject::connect(et, SIGNAL(finished()), et, SLOT(quit()));
+   // et = new EngThread(eng, eng->m_robot->currentPos());
+   // QObject::connect(et, SIGNAL(finished()), et, SLOT(quit()));
 
 	 // Try to initialize an Arduino connected to /dev/ttyUSB1
 	 clawduino = new Clawduino(m_logger, "/dev/ttyUSB1");
@@ -102,8 +105,14 @@ GantryWindow::GantryWindow(QWidget *parent) :
 	 // Set a default "claw line"
 ////#define DEFAULT_CLAW_OFFSET -0.75, -3.15
 	 m_logger->log("Setting default 'claw' offset to -0.75, -3.15.");
-    eng->move_claw_line(-0.75, -3.15, 0);
 
+#ifndef TEST_RECT
+    eng->move_claw_line(-0.75, -3.15, 0);
+#endif
+
+#ifdef TEST_RECT
+	ui->chartView->updateSeries();
+#endif
 
 }
 

@@ -16,4 +16,6 @@
 // Empirically tested - for a max height of 0.10 + 0.25 = 0.35m
 #define DEFAULT_PLANE_SEPARATION 0.25
 
+#define PI 3.14159265
+
 #endif

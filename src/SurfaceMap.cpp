@@ -71,6 +71,7 @@ SurfaceMap::initialize(PointCloud::Ptr surface, const Point & centroid, const Ca
 	float												x_diff;
 	float												y_diff;
 
+
 	for (Iterator i = surface->begin(); i != surface->end(); ++i)
 	{
 		PCLUtils::subtractXYZ(*i, centroid, difference);
@@ -80,6 +81,9 @@ SurfaceMap::initialize(PointCloud::Ptr surface, const Point & centroid, const Ca
 
 		coordinates.push_back(Coordinate(x_diff, y_diff));
 	}
+
+	convex_hull();
+	calculateMinimumAreaRect();
 
 	return SUCCESS;
 }
@@ -92,9 +96,6 @@ SurfaceMap::calculateMinimumAreaRect()
 
 	for (size_t i0 = hull.size() -1, i1 = 0; i1 < hull.size(); i0 = i1++)
 	{
-
-		
-
 		Coordinate origin = hull[i0];
 		Coordinate U0		= hull[i1] - origin;
 
@@ -109,14 +110,14 @@ SurfaceMap::calculateMinimumAreaRect()
 
         //std::cout << "dot_test = " << dot_test << std::endl;
 
-		std::cout << "------------------------ Next ------------------------" << std::endl;
+///	std::cout << "------------------------ Next ------------------------" << std::endl;
 		for (size_t j = 0; j < hull.size(); ++j)
 		{
 			Coordinate D = hull[j] - origin;
 			float dot = U0.dot(D);
 			const float min_dot = 0.001;
 
-			std::cout << "     U0.dot(D) = " << dot << std::endl;
+///		std::cout << "     U0.dot(D) = " << dot << std::endl;
 			if (dot > min_dot || (-1.0 * dot) > min_dot) {
 				if (dot < min0) {
 					min0 = dot;

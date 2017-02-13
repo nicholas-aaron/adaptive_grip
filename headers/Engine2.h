@@ -73,6 +73,9 @@ public:
    bool                             position_valid;
 
 
+	float 									j4_pickup_angle;
+
+
 public:
 
    ClusterCloud current_view;

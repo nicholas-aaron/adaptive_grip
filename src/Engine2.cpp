@@ -397,23 +397,61 @@ Engine2::create_closest_surface_map(ClusterCloud current_view, std::vector<WSObj
 
 	add_cloud_to_viewer(closest_cluster_cloud, "ClosestCluster", vp_calibration_axes, 255, 0, 0);
 
-	// for now, return the height from the floor plane
-///Cluster<Point> clusterPoint(*closest_object_centroid);
-///height = std::fabs(clusterPoint.get_distance_to_plane(m_floor_plane)) + DEFAULT_FLOOR_HEIGHT;
-
-///{
-///	stringstream msg;
-///	msg << "get_approach(): Calculated a height of " << height;
-///	m_logger->log(msg);
-///}
-
-	// Then: initialize a SurfaceMap object using closest_cluster_cloud
+	// Stop the memory leak
+	if (surface != NULL) {
+		delete surface;
+	}
 
 	surface = new SurfaceMap();
-	// Load the surface
-    surface->initialize(closest_cluster_cloud, *closest_object_centroid, m_cal);
+   surface->initialize(closest_cluster_cloud, *closest_object_centroid, m_cal);
 
-	
+	 // At this point we have a valid rectangle in 'Surface'
+	 // Find the largest of 'extent' and 'extent2'.
+/// using SurfaceMap::Rectangle;
+
+	 SurfaceMap::Rectangle &	top_surface = surface->minimumAreaRectangle;
+
+	 int longest_axis;
+
+	 if (top_surface.extent[0] > top_surface.extent[1]) {
+	 	longest_axis = 0;
+	 } else {
+		longest_axis = 1;
+	 }
+
+	 // Get the angle of the longest axis with the x-axis, in degrees
+	 float 	angle;
+	 angle = 	atan( top_surface.axis[longest_axis].y / top_surface.axis[longest_axis].x );
+	 angle = 	angle * 180.0 / PI;
+
+	 // And print out this angle.
+	 {
+		 std::stringstream msg;
+		 msg << "Axis Y = " << top_surface.axis[longest_axis].y << endl;
+		 msg << "Axis X = " << top_surface.axis[longest_axis].x << endl;
+		 msg << "Calculated an angle of : " << angle;
+		 m_logger->log(msg);
+	 }
+
+	 // We want to move j4 to `angle` + 90 degrees.
+
+	 j4_pickup_angle = angle + 90.0;
+
+	 // If j4 is outside the robot limits, correct it by adding plus or minus 180.
+	 const RobotLimits limits = m_robot->currentLimits();
+	 while (j4_pickup_angle > limits.max().j4) {
+			j4_pickup_angle -= 180.0;
+	 }
+	 while (j4_pickup_angle < limits.min().j4) {
+			j4_pickup_angle += 180.0;
+	 }
+
+	 {
+		 std::stringstream msg;
+		 msg << "Corrected j4 to: " << j4_pickup_angle << ".";
+		 m_logger->log(msg);
+	 }
+
 
 
 }
@@ -425,6 +463,7 @@ std::vector<WSObject>::iterator Engine2::get_closest_object()
    Iterator    closest = m_objects->begin();
 // float shortest_distance = xy_distance(, getPosition());
 //
+
 // Get claw projection
    Point claw_center = get_claw_center_projection();
    float shortest_distance = -1;
@@ -460,6 +499,7 @@ bool Engine2::vantage_point(std::vector<WSObject>::iterator object)
    initial.x = object->x_position + VANTAGE_X_OFFSET; // Empirically determined
    initial.y = object->y_position + VANTAGE_Y_OFFSET;
    initial.z = 200.0; // pretty high
+
    moveTo(initial);
    return true;
 }
@@ -470,9 +510,11 @@ bool Engine2::pickup(std::vector<WSObject>::iterator obj)
 	// TODO should also exit if the object was observed at a far-away location.
 
 	m_logger->log("Entering Engine2::pickup()");
-///create_closest_surface_map(current_view, obj);
 
    scan();
+
+	// First: position j4.
+	m_logger->log("Positioning j4.");
 
    RobotPosition obj_position = getPosition();
    if (!calculate_robot_position(obj->point, obj_position))
@@ -480,16 +522,23 @@ bool Engine2::pickup(std::vector<WSObject>::iterator obj)
       m_logger->log("pickup() - the calcualted RobotPosition is outside of bounds.");
       return false;
    } else {
+
+		// Set j4 correctly.
+		obj_position.j4 = j4_pickup_angle;
+
       moveTo(obj_position);
       //position_valid = false;
 
 		stringstream msg;
-        float z_height = 105 + (obj->plane_distance - 0.349483) * 1000; // 1000 = millimetres per metre
+
+		// Empirically determined equation for calculating the height we want.
+	   float z_height = 105 + (obj->plane_distance - 0.349483) * 1000; // 1000 = millimetres per metre
+
 		msg << "The recommended Z-axis height is " << z_height << " (plane_distance = " << obj->plane_distance << ")";
 		m_logger->log(msg);
 
-        obj_position.z = z_height;
-        moveTo(obj_position);
+      obj_position.z = z_height;
+      moveTo(obj_position);
    }
 	m_logger->log("Exiting Engine2::pickup()");
    return true;
@@ -619,6 +668,8 @@ Engine2::Engine2(pcl::visualization::PCLVisualizer::Ptr vis,
    m_logger(logger)
    
 {
+
+	surface = NULL;
 
 	stringstream limits;
     limits << m_robot->currentLimits();

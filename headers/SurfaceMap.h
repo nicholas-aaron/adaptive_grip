@@ -4,33 +4,66 @@
 #include "common_defs.h"
 #include "PCLUtils.h"
 #include "Calibration.h"
+#include "Coordinate.h"
 #include <algorithm>
 #include <vector>
+#include <limits>
+
+#ifdef GTE
+#include <Mathematics/GteBSRational.h>
+#include <Mathematics/GteMinimumAreaBox2.h>
+//#include <Mathematics/GteUIntegerAP32.h>
+#endif
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+
+//#define X 0
+//#define Y 1
 
 class SurfaceMap {
 
 public:
 
-	typedef struct _Coordinate {
-		float x, y;
-		bool operator <(const _Coordinate &p) const {
-			return x < p.x || (x == p.x && y < p.y);
+
+
+	typedef struct {
+		Coordinate center;
+		Coordinate axis[2];
+		float 	  extent[2];
+		float 	  area;
+
+		std::vector<Coordinate> 	corners() {
+			std::vector<Coordinate>	cornerVect;
+			Coordinate cornerOne 		= center + extent[0] * axis[0] + extent[1] * axis[1];
+			Coordinate cornerTwo 		= center - extent[0] * axis[0] + extent[1] * axis[1];
+			Coordinate cornerThree 		= center + extent[0] * axis[0] - extent[1] * axis[1];
+			Coordinate cornerFour 		= center - extent[0] * axis[0] - extent[1] * axis[1];
+
+			cornerVect.push_back(cornerOne);
+			cornerVect.push_back(cornerTwo);
+			cornerVect.push_back(cornerThree);
+			cornerVect.push_back(cornerFour);
+
+			return cornerVect;
+
+
 		}
-		_Coordinate(float _x, float _y) : x(_x), y(_y) {}
+	} Rectangle;
 
-		_Coordinate(const _Coordinate & copy) :
-			x(copy.x), y(copy.y) {}
-
-		_Coordinate() :
-			x(0.0), y(0.0) {}
-
-	} Coordinate;
 
 	// 2D cross product of OA and OB vectors.
 	float cross(const Coordinate &O, const Coordinate &A, const Coordinate &B);
 
 	// Returns a vector of points forming a convex hull.
 	int	convex_hull();
+	int	convex_hull_2();
+
+	Rectangle minimumAreaRectangle;
+	void calculateMinimumAreaRect();
 
 	std::vector<Coordinate> coordinates;
 	std::vector<Coordinate> hull;
@@ -42,6 +75,8 @@ public:
 	// Build a surface map from a Kinect scan.
 	int initialize(PointCloud::Ptr surface, const Point & centroid, const Calibration & cal);
 
+
 };
+
 
 #endif
