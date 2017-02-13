@@ -19,14 +19,9 @@
 #include "WSObject.h"
 #include "SurfaceMap.h"
 
+#include <QObject>
 
-// How far away, from the centroid of an object, in the X direction,
-// that we should be to get the best view of it.
-#define VANTAGE_X_OFFSET 250.0
 
-// How far away, from the centroid of an object, in the Y direction,
-// that we should be to get the best view of it.
-#define VANTAGE_Y_OFFSET 0.0
 
 // Rise speed: 30% of max
 #define RISE_SPEED 0.5
@@ -37,6 +32,9 @@
 // Descent speed: 10% of max
 #define DESCENT_SPEED 0.25
 
+#define NO_ENGINE
+
+
 
 using std::stringstream;
 using pcl::visualization::PointCloudColorHandlerCustom;
@@ -44,7 +42,10 @@ using PCLUtils::addXYZ;
 using PCLUtils::subtractXYZ;
 using std::endl;
 
-class Engine2 {
+class Engine2 : public QObject {
+
+	Q_OBJECT
+
 public: 
 
    typedef pcl::PointXYZRGBA        Point;
@@ -111,7 +112,6 @@ public:
    #define CLOSEST_OBJECT 50
    #define DEFAULT_OBJECT 40
 
-// int add_object(float x, float y, const RobotPosition & observed_position, int objType = DEFAULT_OBJECT);
    int add_object(Point, bool);
    bool remove_object(float x, float y);
 
@@ -205,9 +205,15 @@ public:
 
 	SurfaceMap * surface;
 
+signals:
+
+	void RestartLiveFeed();
+
+
 public:
    // Just in case..
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
    
 };
 

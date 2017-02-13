@@ -33,7 +33,8 @@ ChartView::updateSeries()
     for (CoordIt it = surface->coordinates.begin(); it != surface->coordinates.end(); ++it)
 	 {
 		// Fill a series
-		points_2d->append(it->x, it->y);
+
+        points_2d->append(it->x, it->y);
 	 }
      points_2d->setMarkerSize(5.0);
      points_2d->setColor(QColor(255,0,0));

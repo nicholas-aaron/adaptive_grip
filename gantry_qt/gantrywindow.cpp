@@ -20,6 +20,7 @@ const int INCREASE_J4 = 104;
 const int INCREASE_J5 = 105;
 const int INCREASE_J6 = 106;
 
+#define NO_ENGINE
 
 GantryWindow::GantryWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,13 +32,15 @@ GantryWindow::GantryWindow(QWidget *parent) :
 
     m_logger = new QLogger(ui->statusDisplay);
 //eng = new Engine3(viewer, m_logger);
-#ifndef TEST_RECT
-  eng = new Engine2(viewer, m_logger);
+
+//#ifndef NO_ENGINE
+	eng = new Engine2(viewer, m_logger);
    ui->itemDisplay->m_objects = eng->m_objects;
-#endif
+//#endif
 
 
- //  live_viewer = new LiveViewer(ui->qvtkWidgetLive, viewer, eng->vp_calibration_axes);
+   live_viewer = new LiveViewer(ui->qvtkWidget, viewer, eng->vp_calibration_axes);
+
     ui->qvtkWidget->SetRenderWindow(viewer->getRenderWindow());
     viewer->setupInteractor(ui->qvtkWidget->GetInteractor(), ui->qvtkWidget->GetRenderWindow());
     ui->qvtkWidget->update();
@@ -63,6 +66,9 @@ GantryWindow::GantryWindow(QWidget *parent) :
 
     ui->cal_y_spin->setMinimum(-100.0);
     ui->cal_x_spin->setMinimum(-100.0);
+
+	 // New for Live Viewer...
+	 CHECKED_CONNECT(eng, SIGNAL(RestartLiveFeed()), this, SLOT(startLiveViewerFeed()));
 	
   
     /*
@@ -106,21 +112,18 @@ GantryWindow::GantryWindow(QWidget *parent) :
 ////#define DEFAULT_CLAW_OFFSET -0.75, -3.15
 	 m_logger->log("Setting default 'claw' offset to -0.75, -3.15.");
 
-#ifndef TEST_RECT
+//#ifndef NO_ENGINE
     eng->move_claw_line(-0.75, -3.15, 0);
-#endif
-
-#ifdef TEST_RECT
-	ui->chartView->updateSeries();
-#endif
+//	ui->chartView->updateSeries();
+//#endif
 
 }
 
 void GantryWindow::startLiveFeed() { 
-   //live_viewer->start();
+   live_viewer->start();
 }
 void GantryWindow::stopLiveFeed() {
-    //live_viewer->stop();
+    live_viewer->stop();
 }
 
 
@@ -355,4 +358,9 @@ void GantryWindow::sendSerial()
 	} else {
 		m_logger->log("GantryWindow::sendSerial() - could not send message.");
 	}
+}
+
+void GantryWindow::startLiveViewerFeed()
+{
+	live_viewer->start();
 }

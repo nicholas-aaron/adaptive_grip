@@ -100,7 +100,13 @@ bool Engine2::remove_object(float x, float y) {
 
 RobotPosition  Engine2::getPosition()
 {
-   return m_robot->currentPos();
+// return m_robot->currentPos();
+#ifdef NO_ENGINE
+	return RobotPosition(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+#else
+	return m_robot->currentPos();
+#endif
+
 // if (!position_valid) {
 //    currentPosition = m_robot->currentPos();
 // }
@@ -113,7 +119,11 @@ bool Engine2::validate_limits(const RobotPosition & pos)
 {
 	// Check if the position we're validating is within
 	// the robot's limits.
+   #ifndef NO_ENGINE
 	return m_robot->currentLimits().posWithin(pos);
+   #else
+    return false;
+#endif
 }
 
 bool Engine2::calculate_camera_position(const Point & position, RobotPosition & new_pos)
@@ -549,6 +559,14 @@ void Engine2::load_raw(ClusterCloud & cc)
    cc.cloud.reset(new PointCloud);
 // cc.reset();
    m_camera.retrieve();
+
+	// HERE: emit the 'done with camera' signal.
+	// That way we can tell the live viewer to re-start its interface,
+	// which will re-start the live viewer. You can only have one 
+	// interface running at a time.
+	emit RestartLiveFeed();
+
+
    *cc.cloud = *cam_cloud_;
 // pcl::copyPointCloud(*cam_cloud_, *cc.cloud);
 
@@ -661,19 +679,27 @@ void Engine2::axis_view_setup(int viewport)
 /* Constructor */
 Engine2::Engine2(pcl::visualization::PCLVisualizer::Ptr vis,
       Logger * logger) :
+	QObject(0),
    cam_cloud_(new PointCloud()),
    dummy_mutex_(new Mutex()),
    m_camera(cam_cloud_, dummy_mutex_),
+    #ifndef NO_ENGINE
    m_robot(new Robot("/dev/gantry")),
+    #else
+    m_robot(NULL),
+    #endif
    m_logger(logger)
    
 {
 
 	surface = NULL;
 
+#ifndef NO_ENGINE
 	stringstream limits;
     limits << m_robot->currentLimits();
 	m_logger->log(limits);
+#endif
+
 
    position_valid = false;
 

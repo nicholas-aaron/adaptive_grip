@@ -8,9 +8,6 @@ ClusterFinder<PointT>::ClusterFinder(CloudPtr cloud, Mutex * mutex) :
    _tree(new pcl::search::KdTree<PointT>),
    _ds_cloud(CloudPtr(new Cloud))
 {
-//    _ds_filter.setInputCloud(_input_cloud);
-//    _ds_filter.setLeafSize(CF_DEFAULT_VOXELSIZE);
-
    // Euclidean cluster extraction settings
    _ece.setClusterTolerance(CF_DEFAULT_TOLERANCE);
    _ece.setMinClusterSize(CF_DEFAULT_MIN_CLUSTERSIZE);

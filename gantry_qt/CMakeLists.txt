@@ -49,7 +49,7 @@ qt5_wrap_ui(UIS_HDRS
 aux_source_directory(. SRC_LIST)
 #link_directories(${LINK_DIRECTORIES} "/home/robot/Documents/Group3/adaptive_grip/hack")
 
-set (SOURCES mainwindow.cpp itemdisplaywindow.cpp chartview.cpp gantrywindow.cpp calibrationwindow.cpp engthread.cpp)
+set (SOURCES mainwindow.cpp itemdisplaywindow.cpp chartview.cpp gantrywindow.cpp calibrationwindow.cpp engthread.cpp liveviewer.cpp)
 add_executable(${PROJECT_NAME} main.cpp ${SOURCES} ${UIS_HDRS} mainwindow.cpp)
 add_executable(calibrate ${SOURCES} ${UIS_HDRS} calibrate.cpp)
 
