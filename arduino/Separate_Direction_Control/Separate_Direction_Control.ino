@@ -9,6 +9,7 @@
 #define DIR_6 8
 #define EN 10
 #define ARRAY_SIZE 6
+#define FORCE_THRESHOLD 500
 
 #define FORCE_THRESHOLD 900
 
@@ -17,21 +18,30 @@ char userInput;
 boolean firstRun = true;
 
 //Arrays
-int 		motors[ARRAY_SIZE] = {1,2,3,4,5,6}; //rotate motor or vibrate in place
+int 		motors[ARRAY_SIZE] = {0,0,0,0,0,0}; //rotate motor or vibrate in place
 
 // True = open
 // False = close
-boolean 	directions[ARRAY_SIZE] = {false,false,false,true,true,true};//clockwise or counter clockwise
+boolean 	directions[ARRAY_SIZE] = {false,false,false,true,true,true};//true is open, false is close
 
 // Counter to remember how many steps each motor's moved
 int 		positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
 
 // Bounds of the steps - 0 is the lower limit for all
-int 		limits[ARRAY_SIZE] = {700,700,700,600,600,600};
-
+int     limits[ARRAY_SIZE] = {950,850,800,650,600,740};
+int 		outerLimits[ARRAY_SIZE] = {950,850,800,650,600,740};
+int     innerLimits[ARRAY_SIZE] = {400,400,400,400,400,400};
 // "Curl Limits"
-int 		curlLimits[ARRAY_SIZE] = {400,400,400,50,50,50};
+int 	curlLimits[ARRAY_SIZE] = {400,400,400,50,50,50};
+int     clampLimits[ARRAY_SIZE] = {400,400,400,450,450,450};
 
+int force[6] = {0,0,0,0,0,0};
+//force[0]: paired with motor 1 and 6, A2
+//force[1]: paired with motor 2 and 4, A0
+//force[2]: paired with motor 3 and 5. A1
+//force[3]: paired with motor 1 and 6, A5
+//force[4]: paired with motor 2 and 4, A3
+//force[3]: paired with motor 3 and 5, A4
 
 // function declarations
 void printArrays(int(*motors), boolean directions[], int arrayLength);
@@ -51,7 +61,7 @@ void openFinger1(int (*motors), boolean directions[], int (*positions));
 void openFinger3(int (*motors), boolean directions[], int (*positions));
 void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*limits));
 void closeAllJoints(int (*motors), boolean directions[], int (*positions));
-void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits), int);
+void curlGrab(int(*motors),boolean directions[], int(*positions), int (*limits));
 
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);
@@ -62,6 +72,14 @@ void setup() { //--------------------------------------------------- SETUP -----
   pinMode(DIR_5,OUTPUT);
   pinMode(DIR_6,OUTPUT);
   pinMode(EN,OUTPUT);
+
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A4, INPUT);
+  pinMode(A5, INPUT);
+  
   setPins(); 
   Serial.begin(9600); 
   displayMenu();
@@ -69,7 +87,7 @@ void setup() { //--------------------------------------------------- SETUP -----
 
 void loop() { // ------------------------------------------------------- MAIN LOOP --------------------------------------------------//
   if (firstRun){
-    setOriginalPosition(EN, positions);
+    setOriginalPosition(EN, positions); //home the robot manually, then enter input through serial monitor to 'lock' robot and store 'zero' positions
     firstRun = false;  
   }
   
@@ -80,19 +98,9 @@ void loop() { // ------------------------------------------------------- MAIN LO
       displayMenu();
     }
     else{
-
-      zeroIntArray(motors,ARRAY_SIZE);
-      userMotorChoice(userInput, motors, directions); // Sets new motors array and directions array
-      driveMotor(motors, 5, directions, positions, ARRAY_SIZE);
-
-      //debugging
-//      for(int i = 0; i < 6; i++){
-//        Serial.print("Position of motor ");
-//        Serial.print(i+1);
-//        Serial.print(" is: ");
-//        Serial.println(positions[i]);
-//      }
-      //displayMenu();
+      zeroIntArray(motors,ARRAY_SIZE); //sets all motors to 'do not move' by setting each value of the array to '0'
+      userMotorChoice(userInput, motors, directions, force); // Sets new motors array and directions array
+      driveMotor(motors, 5, directions, positions, ARRAY_SIZE); 
     } 
   }
 }
