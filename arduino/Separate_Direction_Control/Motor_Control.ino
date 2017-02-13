@@ -235,6 +235,13 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions), int (
     directions[i] = false;
   }
   int check = 1;
+
+  //added checkPressure
+  checkPressure(force);
+  //added for loop; forceThreshold values are 40 above intial force values
+  for(int i = 0; i<6; i++){
+    forceThreshold[i] = force[i] + 40;
+  }
   while (check != 0)
   {
     check = 0;

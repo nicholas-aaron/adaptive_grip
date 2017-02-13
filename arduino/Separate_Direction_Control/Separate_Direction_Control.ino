@@ -9,8 +9,9 @@
 #define DIR_6 8
 #define EN 10
 #define ARRAY_SIZE 6
-int forceThreshold[6] = {562+40,250+40,470+40,193+40,455+40,438+40};
-
+//int forceThreshold[6] = {562+40,250+40,470+40,193+40,455+40,438+40};
+//added new array all initialized to zero
+int forceThreshold[6] = {0,0,0,0,0,0};
 //Declare variables for functions
 char userInput;
 boolean firstRun = true;
