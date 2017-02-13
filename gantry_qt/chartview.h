@@ -8,6 +8,8 @@
 #include <QtGui/QPainter>
 #include "SurfaceMap.h"
 
+
+
 QT_CHARTS_USE_NAMESPACE
 
 class ChartView : public QChartView
