@@ -65,7 +65,7 @@ Camera<PointT>::_update_cloud_callback(const typename pcl::PointCloud<PointT>::C
    _camera_cloud = cloud; // Is this wrong? A: nope
    _retrieved_cloud = true;
 #ifdef DEBUG_CAMERA
-   std::cout << "Update." << std::endl;
+   std::cout << "Camera::Update." << std::endl;
 #endif
    _cloud_mutex->unlock();
 }

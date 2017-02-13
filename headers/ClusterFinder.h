@@ -23,7 +23,13 @@
 #include "Mutex.h"
 
 #define CF_DEFAULT_VOXELSIZE 0.03f, 0.03f, 0.03f
-#define CF_DEFAULT_TOLERANCE 0.10 // 20cm
+
+// AN Feb. 12: CF_DEFAULT_TOLERANCE 0.10 was being used up to now.
+// Small cluster tolerance - an actual object can be seen as multiple clusters.
+// High cluster tolerance - multiple objects are seen as one cluster.
+//#define CF_DEFAULT_TOLERANCE 0.10 // 10cm
+#define CF_DEFAULT_TOLERANCE 0.02
+
 #define CF_DEFAULT_MIN_CLUSTERSIZE 100
 #define CF_DEFAULT_MAX_CLUSTERSIZE 25000
 
@@ -66,7 +72,6 @@ template <typename PointT> class ClusterFinder {
    CloudPtr                                           _ds_cloud; // The downsampled point-cloud
    int                                                _downsample_factor;
    Mutex *                                            _cloud_mutex;
-// pcl::VoxelGrid<Cloud>   _ds_filter;
 
    pcl::EuclideanClusterExtraction<PointT>            _ece;
    typename pcl::search::KdTree<PointT>::Ptr          _tree;

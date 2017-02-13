@@ -11,7 +11,7 @@
 #include "RobotPosition.h"
 #include "Clawduino.h"
 #include "engthread.h"
-//#include "liveviewer.h"
+#include "liveviewer.h"
 //#include "liveupdatethread.h"
 
 #include <vtkRenderWindow.h>
@@ -43,7 +43,7 @@ public:
     Engine2 *  eng;
 
 //  pcl::visualization::PCLVisualizer::Ptr       live_viewer;
-  //  LiveViewer * live_viewer;
+    LiveViewer * live_viewer;
 
  	// TODO FOR NOW TODO 
 	Clawduino * clawduino;
@@ -70,6 +70,7 @@ public slots:
    void stopLiveFeed();
    void manualMove(int);
    void sendSerial();
+	void startLiveViewerFeed();
 };
 
 #endif // GANTRYWINDOW_H

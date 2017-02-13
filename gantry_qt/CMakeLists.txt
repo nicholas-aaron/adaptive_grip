@@ -30,11 +30,10 @@ include_directories("${INCLUDE_DIRECTORIES} /opt/Qt5.7.0/5.7/gcc_64/include")
 # GripperBase Library
 #include_directories(${INCLUDE_DIRECTORIES} "/Users/amnicholas/Documents/ELEC490/adaptive_grip_recent/libraries/GantryLib/")
 
-add_subdirectory(${FOURXX_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}fourxx)
+add_subdirectory(${FOURXX_DIR}/src  ${CMAKE_CURRENT_BINARY_DIR}fourxx)
 
 link_directories(${PCL_LIBRARY_DIRS})
 link_directories(${LINK_DIRECTORIES} "${FOURXX}/libraries/GripperBase")
-
 link_directories(${LINK_DIRECTORIES} "/opt/Qt5.7.0/5.7/gcc_64/lib")
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
@@ -48,13 +47,14 @@ qt5_wrap_ui(UIS_HDRS
     calibrationwindow.ui)
 
 aux_source_directory(. SRC_LIST)
+#link_directories(${LINK_DIRECTORIES} "/home/robot/Documents/Group3/adaptive_grip/hack")
 
-set (SOURCES mainwindow.cpp itemdisplaywindow.cpp chartview.cpp gantrywindow.cpp calibrationwindow.cpp engthread.cpp)
+set (SOURCES mainwindow.cpp itemdisplaywindow.cpp chartview.cpp gantrywindow.cpp calibrationwindow.cpp engthread.cpp liveviewer.cpp)
 add_executable(${PROJECT_NAME} main.cpp ${SOURCES} ${UIS_HDRS} mainwindow.cpp)
 add_executable(calibrate ${SOURCES} ${UIS_HDRS} calibrate.cpp)
-target_link_libraries(pcl_qt_cmake ${PCL_LIBRARIES} ${Readline_LIBRARY} ${VTK_LIBRARIES} Utils GripperBase boost_thread Qt5Charts)
-target_link_libraries(calibrate ${PCL_LIBRARIES} ${Readline_LIBRARY} ${VTK_LIBRARIES} Utils GripperBase boost_thread Qt5Charts)
+
+target_link_libraries(pcl_qt_cmake ${PCL_LIBRARIES} ${Readline_LIBRARY} ${VTK_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Charts GripperBase boost_thread Qt5Charts Utils )
+target_link_libraries(calibrate ${PCL_LIBRARIES} ${Readline_LIBRARY} ${VTK_LIBRARIES} Utils GripperBase boost_thread Qt5Charts Utils )
 
 
 # qt5_use_modules(${PROJECT_NAME} Widgets)
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Widgets Qt5Charts)
