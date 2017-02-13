@@ -101,11 +101,7 @@ bool Engine2::remove_object(float x, float y) {
 RobotPosition  Engine2::getPosition()
 {
 // return m_robot->currentPos();
-#ifdef NO_ENGINE
-	return RobotPosition(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-#else
 	return m_robot->currentPos();
-#endif
 
 // if (!position_valid) {
 //    currentPosition = m_robot->currentPos();
@@ -445,7 +441,7 @@ Engine2::create_closest_surface_map(ClusterCloud current_view, std::vector<WSObj
 
 	 // We want to move j4 to `angle` + 90 degrees.
 
-	 j4_pickup_angle = angle + 90.0;
+     j4_pickup_angle = angle/* + 90.0*/;
 
 	 // If j4 is outside the robot limits, correct it by adding plus or minus 180.
 	 const RobotLimits limits = m_robot->currentLimits();
@@ -795,21 +791,6 @@ Engine2::move_to_object(int index)
    std::vector<WSObject>::iterator object = m_objects->begin();
    std::advance(object, index);
 
-
-// DMSG("move_to_object(): moving to vantage point.")
-// {
-//    std::stringstream msg;
-//    msg << "vantage-pointing to Object [" << object->id << "].";
-//    m_logger->log(msg);
-// }
-
-// m_logger->log("Warning: moving to a hard-coded \"vantage\" point to re-scan.");
-// RobotPosition initial = getPosition();
-// initial.x = object->x_position + 150.0; // Empirically determined
-// initial.y = object->y_position;
-// initial.z = 0.0;
-// moveTo(initial);
-
    vantage_point(object);
 
    { // Message block
@@ -821,7 +802,7 @@ Engine2::move_to_object(int index)
     create_closest_surface_map(current_view, object);
 
 
-// pickup(object);
+   pickup(object);
 
    // Re-load the point cloud
 
@@ -889,25 +870,8 @@ Engine2::move_claw_line(float x_amount, float y_amount, int viewport)
    addXYZ(origin_, combined_vec, claw_base);
 
    
-
-// {
-//    std::stringstream debug;
-//    debug << "claw_base.x = " <<claw_base.x << " "
-//    << "claw_base.y = " << claw_base.y << " "
-//    << "claw_base.z = " << claw_base.z;
-//    m_logger->log(debug);
-// }
-   
    Cluster<Point> claw_center_clust(claw_base);
    Point claw_center_proj = claw_center_clust.get_plane_projection(m_floor_plane);
-
-// {
-//    std::stringstream debug;
-//    debug << "claw_center_proj.x = " << claw_center_proj.x << " "
-//    << "claw_center_proj.y = " << claw_center_proj.y << " "
-//    << "claw_center_proj.z = " << claw_center_proj.z;
-//    m_logger->log(debug);
-// }
 
    ClusterCloud claw_proj_cloud;
    claw_proj_cloud.cloud->push_back(claw_base);

@@ -32,7 +32,6 @@
 // Descent speed: 10% of max
 #define DESCENT_SPEED 0.25
 
-#define NO_ENGINE
 
 
 
