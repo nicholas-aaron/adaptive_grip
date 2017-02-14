@@ -27,10 +27,10 @@
 #define RISE_SPEED 0.5
 
 // X-Y/J4/J5/J6 speed: 30% of max.
-#define XY_SPEED 0.5
+#define XY_SPEED 0.65
 
 // Descent speed: 10% of max
-#define DESCENT_SPEED 0.25
+#define DESCENT_SPEED 0.75
 
 
 
@@ -204,9 +204,13 @@ public:
 
 	SurfaceMap * surface;
 
+	void draw_clusters();
+	void erase_clusters();
+
 signals:
 
 	void RestartLiveFeed();
+	void StopLiveFeed();
 
 
 public:

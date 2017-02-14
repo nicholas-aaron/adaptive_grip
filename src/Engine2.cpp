@@ -150,9 +150,6 @@ bool Engine2::calculate_robot_position(const Point & position, RobotPosition & n
    float x_amt = PCLUtils::dot_double_normalize(vector_along_floor, m_cal.x_vector);
    float y_amt = PCLUtils::dot_double_normalize(vector_along_floor, m_cal.y_vector);
 
-// new_pos.x += (-1.0 * x_amt * m_cal.x_rpos_amt);
-// new_pos.y += (-1.0 * y_amt * m_cal.y_rpos_amt);
-
    // what the fuck??? why did I have to change the magnitude of new_pos.y???
    // everything went to shit when I started running this code on the lab machine,
    // but it was working with the opposite magnitude (e.g. above on my mac)
@@ -419,7 +416,7 @@ Engine2::create_closest_surface_map(ClusterCloud current_view, std::vector<WSObj
 
 	 int longest_axis;
 
-	 if (top_surface.extent[0] > top_surface.extent[1]) {
+	 if (fabs(top_surface.extent[0]) < fabs(top_surface.extent[1])) {
 	 	longest_axis = 0;
 	 } else {
 		longest_axis = 1;

@@ -66,11 +66,10 @@ public slots:
    void changeXCal(double);
    void changeYCal(double);
    void clear_objects();
-   void startLiveFeed();
-   void stopLiveFeed();
    void manualMove(int);
    void sendSerial();
 	void startLiveViewerFeed();
+	void stopLiveViewerFeed();
 };
 
 #endif // GANTRYWINDOW_H

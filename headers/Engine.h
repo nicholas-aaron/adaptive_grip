@@ -23,6 +23,8 @@
 
 #include <pcl/filters/project_inliers.h>
 
+//#define NO_ENGINE
+
 class Engine {
 
    // Public Typedefs

@@ -31,8 +31,6 @@ ItemDisplayWindow::cycle()
    using std::endl;
    cout << "select_index = " << select_index << endl;
    cout << "Selected object's distance to plane = "  << (*m_objects)[select_index].plane_distance << endl;
-
-
    update();
 
 }
@@ -62,8 +60,35 @@ ItemDisplayWindow::paintEvent(QPaintEvent * event)
    float gantry_x_draw, gantry_y_draw;
 
    convert_to_xy(robot_position, gantry_x_draw, gantry_y_draw);
+	gantry_y_draw = size().height() - gantry_y_draw;
+
    painter.setPen(QPen(Qt::black));
    painter.drawEllipse(gantry_x_draw - radius, gantry_y_draw - radius, radius*2, radius*2);
+
+   QPen 	greyGraphPen(QColor(0xC0, 0xC0, 0xC0));
+	QPen 	darkGraphPen(QColor(119, 136, 153));
+	darkGraphPen.setStyle(Qt::DashLine);
+	greyGraphPen.setStyle(Qt::DashLine);
+	painter.setPen(greyGraphPen);
+	for (int row = 0; row < 10; row++)
+	{
+
+        if (row % 2 == 0)  painter.setPen(darkGraphPen); else painter.setPen(greyGraphPen);
+
+		int height = (size().height() / 10) * row;
+		painter.drawLine( QPoint(0, height), QPoint(size().width(), height) );
+	}
+	painter.setPen(darkGraphPen);
+	painter.drawLine(QPoint(0, size().height() - 1), QPoint(size().width(), size().height() - 1));
+
+	for (int col = 0; col < 10; col++)
+	{
+        if (col % 2 == 0) painter.setPen(darkGraphPen); else painter.setPen(greyGraphPen);
+		int offset = (size().width() / 10) * col;
+		painter.drawLine( QPoint(offset, 0), QPoint(offset, size().height()) );
+	}
+	painter.setPen(darkGraphPen);
+    painter.drawLine(QPoint(size().width() - 1, 0), QPoint(size().width() - 1, size().height()) );
 
    // If the m_objects array hasn't been allocated, return.
    if (!m_objects) {
@@ -77,11 +102,7 @@ ItemDisplayWindow::paintEvent(QPaintEvent * event)
    QPen     defaultPen(Qt::red);
    painter.setPen(defaultPen);
 
-
    typedef std::vector<WSObject>::const_iterator Iterator;
-
-
-
    float min_object_x = limits.min().x;
    float min_object_y = limits.min().y;
    
@@ -92,7 +113,10 @@ ItemDisplayWindow::paintEvent(QPaintEvent * event)
       painter.setPen(QPen(QColor(i->r_display, i->g_display, i->b_display)));
 
       float draw_at_x = (((*i).x_position - min_object_x) / x_scale_factor) - radius;
+
       float draw_at_y = (((*i).y_position - min_object_y) / y_scale_factor) - radius;
+		draw_at_y = size().height() - draw_at_y; // Invert it.
+
       painter.drawEllipse(draw_at_x, draw_at_y, radius*2, radius*2);
    }
 
@@ -101,10 +125,12 @@ ItemDisplayWindow::paintEvent(QPaintEvent * event)
       float radius_big = radius * 1.15;
       painter.setPen(QPen(Qt::red));
       float draw_at_x = (((*m_objects)[select_index].x_position - min_object_x) / x_scale_factor) - radius_big;
+
       float draw_at_y = (((*m_objects)[select_index].y_position - min_object_y) / y_scale_factor) - radius_big;
+		draw_at_y = size().height() - draw_at_y; // Invert it.
+
       painter.drawEllipse(draw_at_x, draw_at_y, radius_big*2, radius_big*2);
    }
-
 
 }
 

@@ -21,7 +21,7 @@
 
 // How far away, from the centroid of an object, in the X direction,
 // that we should be to get the best view of it.
-#define VANTAGE_X_OFFSET 250.0
+#define VANTAGE_X_OFFSET 400.0
 
 // How far away, from the centroid of an object, in the Y direction,
 // that we should be to get the best view of it.

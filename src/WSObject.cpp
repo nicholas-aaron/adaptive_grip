@@ -40,4 +40,4 @@ bool WSObject::operator== (const WSObject& ws) const {
 // Static initiations
 int WSObject::current_id = 0;
 float WSObject::fudge = 60.0; // TODO FIND A WAY TO LOWER THIS
-float WSObject::distance_fudge = 9999;
+float WSObject::distance_fudge = 300; // RobotPosition radius of 500.

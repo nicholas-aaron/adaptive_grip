@@ -41,8 +41,8 @@ using pcl::OpenNIGrabber;
       timer->stop();
       if (interface != NULL) {
          interface->stop();
-         delete interface;
-         interface = NULL;
+//       delete interface;
+//       interface = NULL;
       }
    }
 

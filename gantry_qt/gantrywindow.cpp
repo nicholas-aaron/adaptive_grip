@@ -20,7 +20,7 @@ const int INCREASE_J4 = 104;
 const int INCREASE_J5 = 105;
 const int INCREASE_J6 = 106;
 
-#define NO_ENGINE
+//#define NO_ENGINE
 
 GantryWindow::GantryWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -59,8 +59,8 @@ GantryWindow::GantryWindow(QWidget *parent) :
     CHECKED_CONNECT(ui->cal_x_spin, SIGNAL(valueChanged(double)), this, SLOT(changeXCal(double)));
     CHECKED_CONNECT(ui->cal_y_spin, SIGNAL(valueChanged(double)), this, SLOT(changeYCal(double)));
     CHECKED_CONNECT(ui->clearObjectsButton, SIGNAL(pressed()), this, SLOT(clear_objects()));
-    CHECKED_CONNECT(ui->startLiveButton, SIGNAL(pressed()), this, SLOT(startLiveFeed()));
-    CHECKED_CONNECT(ui->stopLiveButton, SIGNAL(pressed()), this, SLOT(stopLiveFeed()));
+//  CHECKED_CONNECT(ui->startLiveButton, SIGNAL(pressed()), this, SLOT(startLiveFeed()));
+//  CHECKED_CONNECT(ui->stopLiveButton, SIGNAL(pressed()), this, SLOT(stopLiveFeed()));
 
     CHECKED_CONNECT(ui->arduinoButton, SIGNAL(pressed()), this, SLOT(sendSerial()));
 
@@ -69,6 +69,7 @@ GantryWindow::GantryWindow(QWidget *parent) :
 
 	 // New for Live Viewer...
 	 CHECKED_CONNECT(eng, SIGNAL(RestartLiveFeed()), this, SLOT(startLiveViewerFeed()));
+	 CHECKED_CONNECT(eng, SIGNAL(StopLiveFeed()), this, SLOT(stopLiveViewerFeed()));
 	
   
     /*
@@ -119,12 +120,12 @@ GantryWindow::GantryWindow(QWidget *parent) :
 
 }
 
-void GantryWindow::startLiveFeed() { 
-   live_viewer->start();
-}
-void GantryWindow::stopLiveFeed() {
-    live_viewer->stop();
-}
+//void GantryWindow::startLiveFeed() { 
+//   live_viewer->start();
+//}
+//void GantryWindow::stopLiveFeed() {
+//    live_viewer->stop();
+//}
 
 
 void
@@ -154,8 +155,10 @@ GantryWindow::load_calibration()
    update_display();
 
 
-    current_x_cal = -3.05;
-    current_y_cal = -0.95;
+//  current_x_cal = -3.05;
+//  current_y_cal = -0.95;
+    current_x_cal = -3.95;
+    current_y_cal = -0.55;
    eng->move_claw_line(current_x_cal, current_y_cal, 0);
 }
 
@@ -363,4 +366,9 @@ void GantryWindow::sendSerial()
 void GantryWindow::startLiveViewerFeed()
 {
 	live_viewer->start();
+}
+
+void GantryWindow::stopLiveViewerFeed()
+{
+	live_viewer->stop();
 }
