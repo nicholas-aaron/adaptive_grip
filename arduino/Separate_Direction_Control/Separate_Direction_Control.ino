@@ -28,7 +28,7 @@ int 		positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
 
 // Bounds of the steps - 0 is the lower limit for all
 //int   homeLimits[ARRAY_SIZE] = {0,0,0,0,0,0};
-int 	outerLimits[ARRAY_SIZE] = {875,850,800,650,600,610};
+int 	outerLimits[ARRAY_SIZE] = {850,850,850,600,600,600};
 int   innerLimits[ARRAY_SIZE] = {400,400,400,400,400,400};
 
 // "Curl Limits"
@@ -48,7 +48,7 @@ void printArrays(int(*motors), boolean directions[], int arrayLength);
 void zeroIntArray(int (*motors), int arrayLength);
 void falseBooleanArray(boolean directions[], int arrayLength);
 void printPositions(int (*positions));
-void userMotorChoice(char userInput, int (*motors), boolean directions[]);
+void userMotorChoice(char userInput, int (*motors), boolean directions[], int (*force), int (*innerLimits), int (*outerLimits), int (*forceThreshold));
 void displayMenu();
 void driveMotor(int (*motors), int degRotation, boolean directions[], int (*positions), int arrayLength );
 void selectMotor(int (*motors), boolean directions[], int (*positions));
@@ -60,8 +60,10 @@ void setOriginalPosition(int enablePin, int (*positions));
 void openFinger1(int (*motors), boolean directions[], int (*positions));
 void openFinger3(int (*motors), boolean directions[], int (*positions));
 void openAllJoints(int (*motors), boolean directions[], int (*positions), int(*limits));
-void closeAllJoints(int (*motors), boolean directions[], int (*positions));
+void closeAllJoints(int (*motors), boolean directions[], int (*positions), int (*targetPosition));
 void curlGrab(int(*motors),boolean directions[], int(*positions), int (*innerLimits), int (*outerLimits));
+void checkPressure(int (*force));
+ void curlGrab(int(*motors), boolean directions[], int(*positions), int (*innerLimits), int (*force), int (*forceThreshold));
 
 void setup() { //--------------------------------------------------- SETUP -----------------------------------------------------------------//
   pinMode(STP,OUTPUT);
