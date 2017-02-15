@@ -240,7 +240,7 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions), int (
   checkPressure(force);
   //added for loop; forceThreshold values are 40 above intial force values
   for(int i = 0; i<6; i++){
-    forceThreshold[i] = force[i] + 40;
+    forceThreshold[i] = force[i] + THRESHOLD_INCREASE;
   }
   while (check != 0)
   {

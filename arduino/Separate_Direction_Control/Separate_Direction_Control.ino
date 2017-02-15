@@ -9,6 +9,7 @@
 #define DIR_6 8
 #define EN 10
 #define ARRAY_SIZE 6
+#define THRESHOLD_INCREASE 70
 //int forceThreshold[6] = {562+40,250+40,470+40,193+40,455+40,438+40};
 //added new array all initialized to zero
 int forceThreshold[6] = {0,0,0,0,0,0};
@@ -28,7 +29,7 @@ int 		positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
 
 // Bounds of the steps - 0 is the lower limit for all
 //int   homeLimits[ARRAY_SIZE] = {0,0,0,0,0,0};
-int 	outerLimits[ARRAY_SIZE] = {850,850,850,600,600,600};
+int 	outerLimits[ARRAY_SIZE] = {850,850,850,550,600,650};
 int   innerLimits[ARRAY_SIZE] = {400,400,400,400,400,400};
 
 // "Curl Limits"
