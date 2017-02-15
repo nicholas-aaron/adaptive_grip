@@ -228,8 +228,9 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions), int (
   }
 }
 
- void curlGrab(int(*motors), boolean directions[], int(*positions), int (*innerLimits), int (*force), int (*forceThreshold))
+ boolean curlGrab(int(*motors), boolean directions[], int(*positions), int (*innerLimits), int (*force), int (*forceThreshold))
 {
+  boolean objectWasGrabbed = false;
   for (int i = 0; i < 6; i++)
   {
     directions[i] = false;
@@ -265,24 +266,24 @@ void closeAllJoints(int (*motors), boolean directions[], int (*positions), int (
 //        Serial.print(" is : ");
 //        Serial.print(force[i]);
 //      }
-      Serial.println(" ");
+      //Serial.println(" ");
       if (force[i] < forceThreshold[i])
       { // No problems
       }
       else  // Have reached the threshold
       {
-        Serial.println("Force detected on sensor " + i);
-        Serial.println("Exiting CurlGrab");
+        objectWasGrabbed = true;
         for (int i = 0; i < 6; i ++)
         {
           motors[i] = 0;
         }
-        return;
+        return objectWasGrabbed;
       }
 
     }
     if (check > 0)
         driveMotor(motors, 5, directions, positions, 6);
   }
+  return objectWasGrabbed;
 }
 

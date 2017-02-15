@@ -86,13 +86,34 @@ void userMotorChoice(char userInput, int (*motors), boolean directions[], int (*
         break;
     } case 'e': {
         openAllJoints(motors,directions,positions,outerLimits);
-        curlGrab(motors, directions, positions, innerLimits, force, forceThreshold);
+        int   firstInnerLimits[ARRAY_SIZE] = {600,600,600,550,550,550};
+        boolean objectWasAlreadyGrabbed =  curlGrab(motors, directions, positions, firstInnerLimits, force, forceThreshold);
+        if (!objectWasAlreadyGrabbed){
+            //Serial.println("Finished First Grab");
+            objectWasAlreadyGrabbed = curlGrab(motors, directions, positions, innerLimits, force, forceThreshold);
+            //Serial.println("Finished Second Grab");
+        }
         break;
     } case 'f':{
         int homeLimits[6] = {0,0,0,0,0,0};
         closeAllJoints(motors,directions,positions, homeLimits);
         break;
-    } case 'h': {
+    } 
+    
+    case 'g':{
+      openAllJoints(motors,directions,positions,outerLimits);
+        int   firstInnerLimits[ARRAY_SIZE] = {550,550,550,500,500,500};
+        boolean objectWasAlreadyGrabbed =  curlGrab(motors, directions, positions, firstInnerLimits, force, forceThreshold);
+        if (!objectWasAlreadyGrabbed){
+            //Serial.println("Finished First Grab");
+            int secondInnerLimits[ARRAY_SIZE] = {500,500,500,300,300,300};
+            objectWasAlreadyGrabbed = curlGrab(motors, directions, positions, secondInnerLimits, force, forceThreshold);
+            //Serial.println("Finished Second Grab");
+        }
+        break;
+    }
+    case 'h': {
+    
         openAllJoints(motors,directions,positions,outerLimits);
         break;
     }
