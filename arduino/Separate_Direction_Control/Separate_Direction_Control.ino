@@ -29,7 +29,7 @@ int 		positions[ARRAY_SIZE] = {0,0,0,0,0,0}; //with respect to 'home' position
 
 // Bounds of the steps - 0 is the lower limit for all
 //int   homeLimits[ARRAY_SIZE] = {0,0,0,0,0,0};
-int 	outerLimits[ARRAY_SIZE] = {900,900,900,600,600,650};
+int 	outerLimits[ARRAY_SIZE] = {900,900,900,600,600,650}i
 
 int   innerLimits[ARRAY_SIZE] = {400,400,400,400,400,400};
 
